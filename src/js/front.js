@@ -16,7 +16,7 @@ export default (function (wecodeart) {
     const {
         classes = [],
         cookiePath = '/',
-        toast: {},
+        toast: { },
         cookies: {
             necessary = '',
             necessaryPrefix = '',
@@ -27,6 +27,7 @@ export default (function (wecodeart) {
 
     const body = Selector.findOne('body');
     const cookiesNote = Selector.findOne('#wp-cookies-offcanvas');
+    const cookiesForm = Selector.findOne('form[name="wp-cookies"]');
 
     const necessaryArray = necessary.split(',').map(c => c.trim());
     const necessaryPrefixArray = necessaryPrefix.split(',').map(c => c.trim());
@@ -61,14 +62,12 @@ export default (function (wecodeart) {
             Cookies.set(name, '', -1, '/');
         },
         removeMultiple(cookies = []) {
-            cookies.forEach(Cookies.remove);
+            cookies.forEach(c => Cookies.remove(c));
         },
         isNecessary(name) {
             return necessaryArray.includes(name) || necessaryPrefixArray.some(prefix => name.match('^' + prefix + '(|.+?)'));
         },
         getChoices() {
-            const cookiesForm = Selector.findOne('form[name="wp-cookies"]');
-
             if (!cookiesForm) {
                 return document.cookie.split(';').map(cookie => cookie.split('=')[0].trim());
             }
@@ -78,8 +77,6 @@ export default (function (wecodeart) {
             return Array.from(choices).filter(({ checked }) => checked === false).map(({ value }) => value);
         },
         setChoices(value) {
-            const cookiesForm = Selector.findOne('form[name="wp-cookies"]');
-
             let choices = [];
             if (cookiesForm) {
                 choices = Selector.find('input[name="wp-cookies[]"]:not(:disabled)', cookiesForm);
@@ -122,19 +119,34 @@ export default (function (wecodeart) {
     Events.on(document, 'DOMContentLoaded', () => {
         const cookie = Cookies.get('wp-cookies-status');
 
-        // Open if cache or not opened already.
-        if (!cookie && !cookiesNote.classList.contains('show')) {
-            Selector.findOne('#wp-cookies-toggle').click();
-        }
-
         // Respect user choices
         if (!cookie && cookieBlock) {
+            // Remove cookies if no preference.
             const cookies = document.cookie.split(';').map(cookie => cookie.split('=')[0].trim());
             Cookies.removeMultiple(cookies);
             Cookies.set('wp-cookies-blocked', cookies.filter(n => !Cookies.isNecessary(n)).toString());
+            // Disable choices for unnecessary cookies if blocked.
+            if (cookiesForm) {
+                const choices = Selector.find('input[name="wp-cookies[]"]:not(:disabled)', cookiesForm);
+                choices.map(field => field.checked = false);
+            }
+            // Open cookies offcanvas.
+            setTimeout(() => {
+                Selector.findOne('#wp-cookies-toggle').click();
+                console.log('WP Cookies:: Undefined preferences.');
+            }, 250);
         } else if (Cookies.get('wp-cookies-blocked') !== '') {
-            const cookies = Cookies.get('wp-cookies-blocked').split(',').map(c => c.trim());
+            const cookies = Cookies.get('wp-cookies-blocked').split(',').map(c => {
+                if (cookiesForm) {
+                    Selector.findOne(`input[value="${c}"]`, cookiesForm).checked = false;
+                }
+                return c.trim();
+            });
             Cookies.removeMultiple(cookies);
+        } else {
+            // Enable choiches for unnecessary cookies if not blocked.
+            const choices = Selector.find('input[name="wp-cookies[]"]:not(:disabled)', cookiesForm);
+            choices.map(field => field.checked = true);
         }
     });
 

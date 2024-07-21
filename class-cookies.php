@@ -216,9 +216,11 @@ final class Cookies implements Integration {
 				
 				Events.on(cookiesModal, 'hide.wp.modal', function ({ relatedTarget = {} }) {
 					const { value } = relatedTarget?.dataset || {};
-					body.classList[value === 'false' ? 'remove' : 'add'](classes?.allow);
-	
-					Cookies.setChoices(value);
+
+					if( ['false', 'true', 'save'].includes(value) ) {
+						body.classList[value === 'false' ? 'remove' : 'add'](classes?.allow);
+						Cookies.setChoices(value);
+					}
 
 					${toast_js}
 				});
@@ -244,7 +246,7 @@ final class Cookies implements Integration {
 						$selected	= $is_blocked ? false : true;
 						$selected	= $selected && in_array( $name, $blocked, true ) ? false : true;
 					?><tr class="wp-cookies-table__item" data-category="<?php echo esc_attr( get_prop( $props, [ 'category' ], $necessary ? 'necessary' : 'other' ) ); ?>">
-						<?php if( $necessary && $description = get_prop( $props, [ 'description' ] ) ) : ?>
+						<?php if( $description = get_prop( $props, [ 'description' ] ) ) : ?>
 						<td 
 							class="wp-cookies-table__item-name has-floating"
 							data-wp-context="<?php echo esc_attr( toJSON( [
@@ -421,7 +423,6 @@ final class Cookies implements Integration {
 	 * @return 	void
 	 */
 	public function markup(): void {
-		$is_open 	= is_null( get_prop( $_COOKIE, [ 'wp-cookies-status' ] ) );
 		$template 	= $this->get_content( self::SLUGS['offcanvas'] );
 		$settings 	= null;
 
@@ -489,7 +490,7 @@ final class Cookies implements Integration {
 				]
 			],
 			'options'	=> [
-				'isOpen' 	=> $is_open,
+				'isOpen' 	=> false,
 				'scroll' 	=> filter_var( get_prop( $this->config, [ 'offcanvas', 'scroll' ] ), FILTER_VALIDATE_BOOLEAN ),
 				'keyboard' 	=> filter_var( get_prop( $this->config, [ 'offcanvas', 'keyboard' ] ), FILTER_VALIDATE_BOOLEAN ),
 				'backdrop'	=> $backdrop === 'static' ? 'static' : filter_var( $backdrop, FILTER_VALIDATE_BOOLEAN )
@@ -507,10 +508,6 @@ final class Cookies implements Integration {
 		$luminance 	= wecodeart( 'styles' )::rgb_luminance( $background );
 
 		$classnames[] = ( $luminance < get_lightness_limit() ) ? 'theme-is-dark' : 'theme-is-light';
-
-		if( $is_open ) {
-			$classnames[] = 'show';
-		}
 
 		$markup .= wecodeart_template( 'general/offcanvas', [
 			'id'		=> 'wp-cookies',
