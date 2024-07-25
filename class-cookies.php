@@ -36,7 +36,7 @@ final class Cookies implements Integration {
 	const SLUGS		= [
 		'wecodeart' => 'wecodeart/wecodeart',
 		'offcanvas' => 'cookies-offcanvas',
-		'modal'		=> 'cookies-message',
+		'message'	=> 'cookies-message',
 	];
 
 	const CLASSES 	= [
@@ -74,7 +74,7 @@ final class Cookies implements Integration {
 		\add_filter( 'default_wp_template_part_areas', 	[ $this, 'template_area' 	] );
 		\add_filter( 'body_class', 						[ $this, 'body_class' 		] );
 
-		Cookies\Scanner::get_instance();
+		// Cookies\Scanner::get_instance();
 	}
 
 	/**
@@ -216,9 +216,11 @@ final class Cookies implements Integration {
 				
 				Events.on(cookiesModal, 'hide.wp.modal', function ({ relatedTarget = {} }) {
 					const { value } = relatedTarget?.dataset || {};
-					body.classList[value === 'false' ? 'remove' : 'add'](classes?.allow);
-	
-					Cookies.setChoices(value);
+
+					if( ['false', 'true', 'save'].includes(value) ) {
+						body.classList[value === 'false' ? 'remove' : 'add'](classes?.allow);
+						Cookies.setChoices(value);
+					}
 
 					${toast_js}
 				});
@@ -244,7 +246,7 @@ final class Cookies implements Integration {
 						$selected	= $is_blocked ? false : true;
 						$selected	= $selected && in_array( $name, $blocked, true ) ? false : true;
 					?><tr class="wp-cookies-table__item" data-category="<?php echo esc_attr( get_prop( $props, [ 'category' ], $necessary ? 'necessary' : 'other' ) ); ?>">
-						<?php if( $necessary && $description = get_prop( $props, [ 'description' ] ) ) : ?>
+						<?php if( $description = get_prop( $props, [ 'description' ] ) ) : ?>
 						<td 
 							class="wp-cookies-table__item-name has-floating"
 							data-wp-context="<?php echo esc_attr( toJSON( [
@@ -421,7 +423,6 @@ final class Cookies implements Integration {
 	 * @return 	void
 	 */
 	public function markup(): void {
-		$is_open 	= is_null( get_prop( $_COOKIE, [ 'wp-cookies-status' ] ) );
 		$template 	= $this->get_content( self::SLUGS['offcanvas'] );
 		$settings 	= null;
 
@@ -474,59 +475,55 @@ final class Cookies implements Integration {
 			}
 		}
 
-		$template = $p->get_updated_html();
-
-		\add_action( 'wp_footer', function() use ( $is_open, $template ): void {
-			// Toggler
-			$classnames = [ 'wp-element-button', 'wp-element-button--cookies' ];
-			$backdrop	= get_prop( $this->config, [ 'offcanvas', 'backdrop' ] );
-			
-			wecodeart_template( 'general/toggler', [
-				'id'		=> 'wp-cookies',
-				'class'		=> $classnames,
-				'toggle' 	=> 'offcanvas',
-				'icon'		=> [
-					'viewBox' 	=> '0 0 512 512',
-					'paths'		=> [
-						'M257.5 27.6c-.8-5.4-4.9-9.8-10.3-10.6v0c-22.1-3.1-44.6 .9-64.4 11.4l-74 39.5C89.1 78.4 73.2 94.9 63.4 115L26.7 190.6c-9.8 20.1-13 42.9-9.1 64.9l14.5 82.8c3.9 22.1 14.6 42.3 30.7 57.9l60.3 58.4c16.1 15.6 36.6 25.6 58.7 28.7l83 11.7c22.1 3.1 44.6-.9 64.4-11.4l74-39.5c19.7-10.5 35.6-27 45.4-47.2l36.7-75.5c9.8-20.1 13-42.9 9.1-64.9v0c-.9-5.3-5.3-9.3-10.6-10.1c-51.5-8.2-92.8-47.1-104.5-97.4c-1.8-7.6-8-13.4-15.7-14.6c-54.6-8.7-97.7-52-106.2-106.8zM208 144a32 32 0 1 1 0 64 32 32 0 1 1 0-64zM144 336a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm224-64a32 32 0 1 1 0 64 32 32 0 1 1 0-64z'
-					]
-				],
-				'options'	=> [
-					'isOpen' 	=> $is_open,
-					'scroll' 	=> filter_var( get_prop( $this->config, [ 'offcanvas', 'scroll' ] ), FILTER_VALIDATE_BOOLEAN ),
-					'keyboard' 	=> filter_var( get_prop( $this->config, [ 'offcanvas', 'keyboard' ] ), FILTER_VALIDATE_BOOLEAN ),
-					'backdrop'	=> $backdrop === 'static' ? 'static' : filter_var( $backdrop, FILTER_VALIDATE_BOOLEAN )
+		$markup = '';
+		// Toggler
+		$backdrop	= get_prop( $this->config, [ 'offcanvas', 'backdrop' ] );
+		
+		$markup .= wecodeart_template( 'general/toggler', [
+			'id'		=> 'wp-cookies',
+			'class'		=> [ 'wp-element-button', 'wp-element-button--cookies' ],
+			'toggle' 	=> 'offcanvas',
+			'icon'		=> [
+				'viewBox' 	=> '0 0 512 512',
+				'paths'		=> [
+					'M257.5 27.6c-.8-5.4-4.9-9.8-10.3-10.6v0c-22.1-3.1-44.6 .9-64.4 11.4l-74 39.5C89.1 78.4 73.2 94.9 63.4 115L26.7 190.6c-9.8 20.1-13 42.9-9.1 64.9l14.5 82.8c3.9 22.1 14.6 42.3 30.7 57.9l60.3 58.4c16.1 15.6 36.6 25.6 58.7 28.7l83 11.7c22.1 3.1 44.6-.9 64.4-11.4l74-39.5c19.7-10.5 35.6-27 45.4-47.2l36.7-75.5c9.8-20.1 13-42.9 9.1-64.9v0c-.9-5.3-5.3-9.3-10.6-10.1c-51.5-8.2-92.8-47.1-104.5-97.4c-1.8-7.6-8-13.4-15.7-14.6c-54.6-8.7-97.7-52-106.2-106.8zM208 144a32 32 0 1 1 0 64 32 32 0 1 1 0-64zM144 336a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm224-64a32 32 0 1 1 0 64 32 32 0 1 1 0-64z'
 				]
-			] );
+			],
+			'options'	=> [
+				'isOpen' 	=> false,
+				'scroll' 	=> filter_var( get_prop( $this->config, [ 'offcanvas', 'scroll' ] ), FILTER_VALIDATE_BOOLEAN ),
+				'keyboard' 	=> filter_var( get_prop( $this->config, [ 'offcanvas', 'keyboard' ] ), FILTER_VALIDATE_BOOLEAN ),
+				'backdrop'	=> $backdrop === 'static' ? 'static' : filter_var( $backdrop, FILTER_VALIDATE_BOOLEAN )
+			]
+		], false );
 
-			// Offcanvas
-			$classnames = [
-				'wp-offcanvas--' . get_prop( $this->config, [ 'offcanvas', 'position' ] ),
-				'wp-offcanvas--cookies',
-			];
+		// Offcanvas
+		$classnames = [
+			'wp-offcanvas--' . get_prop( $this->config, [ 'offcanvas', 'position' ] ),
+			'wp-offcanvas--cookies',
+		];
 
-			$background = get_prop( $this->config, [ 'offcanvas', 'style', 'backgroundColor' ], '#ffffff' );
-			$background = wecodeart( 'styles' )::hex_to_rgb( $background, 1, true );
-			$luminance 	= wecodeart( 'styles' )::rgb_luminance( $background );
+		$background = get_prop( $this->config, [ 'offcanvas', 'style', 'backgroundColor' ], '#ffffff' );
+		$background = wecodeart( 'styles' )::hex_to_rgb( $background, 1, true );
+		$luminance 	= wecodeart( 'styles' )::rgb_luminance( $background );
 
-			$classnames[] = ( $luminance < get_lightness_limit() ) ? 'theme-is-dark' : 'theme-is-light';
+		$classnames[] = ( $luminance < get_lightness_limit() ) ? 'theme-is-dark' : 'theme-is-light';
 
-			if( $is_open ) {
-				$classnames[] = 'show';
-			}
+		$markup .= wecodeart_template( 'general/offcanvas', [
+			'id'		=> 'wp-cookies',
+			'close'		=> get_prop( $this->config, [ 'offcanvas', 'close' ] ),
+			'class'		=> $classnames,
+			'title'		=> apply_filters( 'wecodeart/filter/support/cookies/offcanvas/title', get_prop( $this->config, [ 'offcanvas', 'title' ] ) ),
+			'content'	=> $p->get_updated_html()
+		], false );
 
-			wecodeart_template( 'general/offcanvas', [
-				'id'		=> 'wp-cookies',
-				'close'		=> get_prop( $this->config, [ 'offcanvas', 'close' ] ),
-				'class'		=> $classnames,
-				'title'		=> apply_filters( 'wecodeart/filter/support/cookies/offcanvas/title', get_prop( $this->config, [ 'offcanvas', 'title' ] ) ),
-				'content'	=> $template
-			] );
+		\add_action( 'wp_footer', static function() use ( $markup ) {
+			echo $markup;
 		}, 0 );
 
 		if( ! is_null( $settings ) ) {
 			\add_action( 'wp_loaded', function() use( $settings ) {
-				$intro 		= $this->get_content( self::SLUGS['modal'] );
+				$intro 		= $this->get_content( self::SLUGS['message'] );
 				$filters 	= $this->display_actions( 'filters' );
 				$table 		= $this->display_cookies();
 				$buttons	= $this->display_actions( 'buttons' );
@@ -702,27 +699,36 @@ final class Cookies implements Integration {
 	 * @return void
 	 */
 	public function register_pattern(): void {
+		register_block_pattern( 'wecodeart/' . self::SLUGS['message'], [
+			'title'       	=> __( 'Cookies message', 'wecodeart' ),
+			'description' 	=> _x( 'Default cookie policy message.', 'Block pattern description', 'wecodeart' ),
+			'inserter'		=> false,
+			'content' 		=> '
+				<!-- wp:paragraph -->
+				<p>' . sprintf( 
+					esc_html__( 'We use cookies to enhance your browsing experience. By continuing to navigate, you consent to our use of cookies. View %s.', 'wecodeart' ),
+					get_the_privacy_policy_link( ' ' )
+				) . '</p>
+				<!-- /wp:paragraph -->
+			'
+		] );
+
 		register_block_pattern( 'wecodeart/' . self::SLUGS['offcanvas'], [
 			'title'       	=> __( 'Cookies offcanvas', 'wecodeart' ),
 			'description' 	=> _x( 'Default cookie policy message and actions.', 'Block pattern description', 'wecodeart' ),
 			'inserter'		=> false,
 			'content' 		=> '
-				<!-- wp:columns {"verticalAlignment":"center","templateLock":"contentOnly","lock":{"move":true,"remove":true}} -->
+				<!-- wp:columns {"verticalAlignment":"center"} -->
 				<div class="wp-block-columns are-vertically-aligned-center">
 					<!-- wp:column {"verticalAlignment":"center","className":"col-12 col-sm"} -->
 					<div class="wp-block-column is-vertically-aligned-center col-12 col-sm">
-						<!-- wp:pattern {"slug":"wecodeart/' . self::SLUGS['modal'] . '"} /-->
+						<!-- wp:pattern {"slug":"wecodeart/' . self::SLUGS['message'] . '"} /-->
 					</div>
 					<!-- /wp:column -->
 					<!-- wp:column {"verticalAlignment":"center","className":"col-12 col-sm-auto"} -->
 					<div class="wp-block-column is-vertically-aligned-center col-12 col-sm-auto">
 						<!-- wp:buttons -->
 						<div class="wp-block-buttons">
-							<!-- wp:button {"backgroundColor":"accent","className":"js-settings"} -->
-							<div class="wp-block-button js-settings">
-								<a class="wp-block-button__link has-accent-background-color has-background wp-element-button">' . esc_html__( 'Manage Options', 'wecodeart' ) . '</a>
-							</div>
-							<!-- /wp:button -->
 							<!-- wp:button {"backgroundColor":"success","className":"js-accept"} -->
 							<div class="wp-block-button js-accept">
 								<a class="wp-block-button__link has-success-background-color has-background wp-element-button">' . esc_html__( 'Accept', 'wecodeart' ) . '</a>
@@ -735,20 +741,6 @@ final class Cookies implements Integration {
 				</div>
 				<!-- /wp:columns -->
 				'
-		] );
-
-		register_block_pattern( 'wecodeart/' . self::SLUGS['modal'], [
-			'title'       	=> __( 'Cookies message', 'wecodeart' ),
-			'description' 	=> _x( 'Default cookie policy message.', 'Block pattern description', 'wecodeart' ),
-			'inserter'		=> false,
-			'content' 		=> '
-				<!-- wp:paragraph -->
-				<p>' . sprintf( 
-					esc_html__( 'We use cookies to enhance your browsing experience. By continuing to navigate, you consent to our use of cookies. View %s.', 'wecodeart' ),
-					get_the_privacy_policy_link( ' ' )
-				) . '</p>
-				<!-- /wp:paragraph -->
-			'
 		] );
 	}
 
@@ -788,7 +780,7 @@ final class Cookies implements Integration {
 	 *
 	 * @return 	string
 	 */
-	private function get_content( string $slug = '' ): string {
+	private function get_content( string $slug = '' ) {
 		if( empty( $slug ) ) {
 			return '';
 		}
@@ -797,7 +789,7 @@ final class Cookies implements Integration {
 			'post_type'      => 'wp_template_part',
 			'posts_per_page' => -1,
 			'no_found_rows'  => true,
-			'post_name__in'	 => $slug,
+			'post_name__in'	 => [ $slug ],
 			'tax_query'      => [
 				[
 					'taxonomy' => 'wp_theme',
@@ -809,7 +801,7 @@ final class Cookies implements Integration {
 
 		$check_query		= new \WP_Query( $check_query_args );
 		$saved_templates 	= $check_query->posts;
-		
+
 		if( count( $saved_templates ) ) {
 			$template = '<!-- wp:template-part {"slug":"' . $slug . '","tagName":"div","theme":"' . wecodeart( 'name' ) . '"} /-->';
 		} else {
