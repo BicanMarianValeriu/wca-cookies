@@ -36,7 +36,7 @@ final class Cookies implements Integration {
 	const SLUGS		= [
 		'wecodeart' => 'wecodeart/wecodeart',
 		'offcanvas' => 'cookies-offcanvas',
-		'modal'		=> 'cookies-message',
+		'message'	=> 'cookies-message',
 	];
 
 	const CLASSES 	= [
@@ -74,7 +74,7 @@ final class Cookies implements Integration {
 		\add_filter( 'default_wp_template_part_areas', 	[ $this, 'template_area' 	] );
 		\add_filter( 'body_class', 						[ $this, 'body_class' 		] );
 
-		Cookies\Scanner::get_instance();
+		// Cookies\Scanner::get_instance();
 	}
 
 	/**
@@ -523,7 +523,7 @@ final class Cookies implements Integration {
 
 		if( ! is_null( $settings ) ) {
 			\add_action( 'wp_loaded', function() use( $settings ) {
-				$intro 		= $this->get_content( self::SLUGS['modal'] );
+				$intro 		= $this->get_content( self::SLUGS['message'] );
 				$filters 	= $this->display_actions( 'filters' );
 				$table 		= $this->display_cookies();
 				$buttons	= $this->display_actions( 'buttons' );
@@ -699,27 +699,36 @@ final class Cookies implements Integration {
 	 * @return void
 	 */
 	public function register_pattern(): void {
+		register_block_pattern( 'wecodeart/' . self::SLUGS['message'], [
+			'title'       	=> __( 'Cookies message', 'wecodeart' ),
+			'description' 	=> _x( 'Default cookie policy message.', 'Block pattern description', 'wecodeart' ),
+			'inserter'		=> false,
+			'content' 		=> '
+				<!-- wp:paragraph -->
+				<p>' . sprintf( 
+					esc_html__( 'We use cookies to enhance your browsing experience. By continuing to navigate, you consent to our use of cookies. View %s.', 'wecodeart' ),
+					get_the_privacy_policy_link( ' ' )
+				) . '</p>
+				<!-- /wp:paragraph -->
+			'
+		] );
+
 		register_block_pattern( 'wecodeart/' . self::SLUGS['offcanvas'], [
 			'title'       	=> __( 'Cookies offcanvas', 'wecodeart' ),
 			'description' 	=> _x( 'Default cookie policy message and actions.', 'Block pattern description', 'wecodeart' ),
 			'inserter'		=> false,
 			'content' 		=> '
-				<!-- wp:columns {"verticalAlignment":"center","templateLock":"contentOnly","lock":{"move":true,"remove":true}} -->
+				<!-- wp:columns {"verticalAlignment":"center"} -->
 				<div class="wp-block-columns are-vertically-aligned-center">
 					<!-- wp:column {"verticalAlignment":"center","className":"col-12 col-sm"} -->
 					<div class="wp-block-column is-vertically-aligned-center col-12 col-sm">
-						<!-- wp:pattern {"slug":"wecodeart/' . self::SLUGS['modal'] . '"} /-->
+						<!-- wp:pattern {"slug":"wecodeart/' . self::SLUGS['message'] . '"} /-->
 					</div>
 					<!-- /wp:column -->
 					<!-- wp:column {"verticalAlignment":"center","className":"col-12 col-sm-auto"} -->
 					<div class="wp-block-column is-vertically-aligned-center col-12 col-sm-auto">
 						<!-- wp:buttons -->
 						<div class="wp-block-buttons">
-							<!-- wp:button {"backgroundColor":"accent","className":"js-settings"} -->
-							<div class="wp-block-button js-settings">
-								<a class="wp-block-button__link has-accent-background-color has-background wp-element-button">' . esc_html__( 'Manage Options', 'wecodeart' ) . '</a>
-							</div>
-							<!-- /wp:button -->
 							<!-- wp:button {"backgroundColor":"success","className":"js-accept"} -->
 							<div class="wp-block-button js-accept">
 								<a class="wp-block-button__link has-success-background-color has-background wp-element-button">' . esc_html__( 'Accept', 'wecodeart' ) . '</a>
@@ -732,20 +741,6 @@ final class Cookies implements Integration {
 				</div>
 				<!-- /wp:columns -->
 				'
-		] );
-
-		register_block_pattern( 'wecodeart/' . self::SLUGS['modal'], [
-			'title'       	=> __( 'Cookies message', 'wecodeart' ),
-			'description' 	=> _x( 'Default cookie policy message.', 'Block pattern description', 'wecodeart' ),
-			'inserter'		=> false,
-			'content' 		=> '
-				<!-- wp:paragraph -->
-				<p>' . sprintf( 
-					esc_html__( 'We use cookies to enhance your browsing experience. By continuing to navigate, you consent to our use of cookies. View %s.', 'wecodeart' ),
-					get_the_privacy_policy_link( ' ' )
-				) . '</p>
-				<!-- /wp:paragraph -->
-			'
 		] );
 	}
 
@@ -785,7 +780,7 @@ final class Cookies implements Integration {
 	 *
 	 * @return 	string
 	 */
-	private function get_content( string $slug = '' ): string {
+	private function get_content( string $slug = '' ) {
 		if( empty( $slug ) ) {
 			return '';
 		}
@@ -794,7 +789,7 @@ final class Cookies implements Integration {
 			'post_type'      => 'wp_template_part',
 			'posts_per_page' => -1,
 			'no_found_rows'  => true,
-			'post_name__in'	 => $slug,
+			'post_name__in'	 => [ $slug ],
 			'tax_query'      => [
 				[
 					'taxonomy' => 'wp_theme',
@@ -806,7 +801,7 @@ final class Cookies implements Integration {
 
 		$check_query		= new \WP_Query( $check_query_args );
 		$saved_templates 	= $check_query->posts;
-		
+
 		if( count( $saved_templates ) ) {
 			$template = '<!-- wp:template-part {"slug":"' . $slug . '","tagName":"div","theme":"' . wecodeart( 'name' ) . '"} /-->';
 		} else {

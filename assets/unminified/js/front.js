@@ -166,11 +166,13 @@ __webpack_require__.r(__webpack_exports__);
     const cookie = Cookies.get('wp-cookies-status');
 
     // Respect user choices
-    if (!cookie && cookieBlock) {
+    if (!cookie) {
       // Remove cookies if no preference.
-      const cookies = document.cookie.split(';').map(cookie => cookie.split('=')[0].trim());
-      Cookies.removeMultiple(cookies);
-      Cookies.set('wp-cookies-blocked', cookies.filter(n => !Cookies.isNecessary(n)).toString());
+      if (cookieBlock) {
+        const cookies = document.cookie.split(';').map(cookie => cookie.split('=')[0].trim());
+        Cookies.removeMultiple(cookies);
+        Cookies.set('wp-cookies-blocked', cookies.filter(n => !Cookies.isNecessary(n)).toString());
+      }
       // Disable choices for unnecessary cookies if blocked.
       if (cookiesForm) {
         const choices = Selector.find('input[name="wp-cookies[]"]:not(:disabled)', cookiesForm);
@@ -189,7 +191,7 @@ __webpack_require__.r(__webpack_exports__);
         return c.trim();
       });
       Cookies.removeMultiple(cookies);
-    } else {
+    } else if (cookiesForm) {
       // Enable choiches for unnecessary cookies if not blocked.
       const choices = Selector.find('input[name="wp-cookies[]"]:not(:disabled)', cookiesForm);
       choices.map(field => field.checked = true);
