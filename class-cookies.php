@@ -729,9 +729,14 @@ final class Cookies implements Integration {
 					<div class="wp-block-column is-vertically-aligned-center col-12 col-sm-auto">
 						<!-- wp:buttons -->
 						<div class="wp-block-buttons">
-							<!-- wp:button {"backgroundColor":"success","className":"js-accept"} -->
+							<!-- wp:button {"backgroundColor":"accent","className":"js-decline","style":{"spacing":{"padding":{"top":"var:preset|spacing|xs","bottom":"var:preset|spacing|xs"}}}} -->
+							<div class="wp-block-button js-decline">
+								<a class="wp-block-button__link has-accent-background-color has-background wp-element-button" style="padding-top:var(--wp--preset--spacing--xs);padding-bottom:var(--wp--preset--spacing--xs)">' . esc_html__( 'Decline', 'wecodeart' ) . '</a>
+							</div>
+							<!-- /wp:button -->
+							<!-- wp:button {"backgroundColor":"success","className":"js-accept","style":{"spacing":{"padding":{"top":"var:preset|spacing|xs","bottom":"var:preset|spacing|xs"}}}} -->
 							<div class="wp-block-button js-accept">
-								<a class="wp-block-button__link has-success-background-color has-background wp-element-button">' . esc_html__( 'Accept', 'wecodeart' ) . '</a>
+								<a class="wp-block-button__link has-success-background-color has-background wp-element-button" style="padding-top:var(--wp--preset--spacing--xs);padding-bottom:var(--wp--preset--spacing--xs)">' . esc_html__( 'Accept', 'wecodeart' ) . '</a>
 							</div>
 							<!-- /wp:button -->
 						</div>
