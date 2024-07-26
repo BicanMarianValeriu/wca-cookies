@@ -131,7 +131,20 @@ export default (function (wecodeart) {
         const cookie = Cookies.get('wp-cookies-status');
 
         // Respect user choices
-        if (!cookie) {
+        if (cookie) {
+            // Handle switches based on user preference.
+            const blockedCookies = Cookies.get('wp-cookies-blocked');
+            if (blockedCookies) {
+                const cookies = blockedCookies.split(',').map(c => c.trim());
+                Cookies.removeMultiple(cookies);
+
+                // Handle switches based on block (for cache).
+                if (cookiesForm) {
+                    const choices = Selector.find('input[name="wp-cookies[]"]:not(:disabled)', cookiesForm);
+                    choices.map(field => field.checked = cookies.includes(field.value) ? false : true);
+                }
+            }
+        } else {
             // Remove cookies if no preference.
             if (cookieBlock) {
                 const cookies = document.cookie.split(';').map(cookie => cookie.split('=')[0].trim());
@@ -139,35 +152,17 @@ export default (function (wecodeart) {
                 Cookies.set('wp-cookies-blocked', cookies.filter(n => !Cookies.isNecessary(n)).toString());
             }
 
-            // Disable choices for unnecessary cookies if blocked.
-            if (cookiesForm) {
-                const choices = Selector.find('input[name="wp-cookies[]"]:not(:disabled)', cookiesForm);
-                choices.map(field => field.checked = false);
-            }
-
-            // Open cookies offcanvas.
-            setTimeout(() => {
-                Selector.findOne('#wp-cookies-toggle').click();
-                console.log('WP Cookies:: Undefined preferences.');
-            }, 250);
-        } else {
-            // Handle switches based on block.
+            // Adjust choices if form exists (for cache).
             if (cookiesForm) {
                 const choices = Selector.find('input[name="wp-cookies[]"]:not(:disabled)', cookiesForm);
                 choices.map(field => field.checked = cookieBlock ? false : true);
             }
 
-            // Handle switches based on user preference.
-            const blockedCookies = Cookies.get('wp-cookies-blocked');
-            if (blockedCookies) {
-                const cookies = blockedCookies.split(',').map(c => {
-                    if (cookiesForm) {
-                        Selector.findOne(`input[value="${c}"]`, cookiesForm).checked = false;
-                    }
-                    return c.trim();
-                });
-                Cookies.removeMultiple(cookies);
-            }
+            // Open cookies offcanvas.
+            setTimeout(() => {
+                Selector.findOne('#wp-cookies-toggle').click();
+                console.log('WP Cookies: Undefined preferences.');
+            }, 500);
         }
     });
 
