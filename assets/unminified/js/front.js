@@ -173,28 +173,36 @@ __webpack_require__.r(__webpack_exports__);
         Cookies.removeMultiple(cookies);
         Cookies.set('wp-cookies-blocked', cookies.filter(n => !Cookies.isNecessary(n)).toString());
       }
+
       // Disable choices for unnecessary cookies if blocked.
       if (cookiesForm) {
         const choices = Selector.find('input[name="wp-cookies[]"]:not(:disabled)', cookiesForm);
         choices.map(field => field.checked = false);
       }
+
       // Open cookies offcanvas.
       setTimeout(() => {
         Selector.findOne('#wp-cookies-toggle').click();
         console.log('WP Cookies:: Undefined preferences.');
       }, 250);
-    } else if (Cookies.get('wp-cookies-blocked') !== '') {
-      const cookies = Cookies.get('wp-cookies-blocked').split(',').map(c => {
-        if (cookiesForm) {
-          Selector.findOne(`input[value="${c}"]`, cookiesForm).checked = false;
-        }
-        return c.trim();
-      });
-      Cookies.removeMultiple(cookies);
-    } else if (cookiesForm) {
-      // Enable choiches for unnecessary cookies if not blocked.
-      const choices = Selector.find('input[name="wp-cookies[]"]:not(:disabled)', cookiesForm);
-      choices.map(field => field.checked = true);
+    } else {
+      // Handle switches based on block.
+      if (cookiesForm) {
+        const choices = Selector.find('input[name="wp-cookies[]"]:not(:disabled)', cookiesForm);
+        choices.map(field => field.checked = cookieBlock ? false : true);
+      }
+
+      // Handle switches based on user preference.
+      const blockedCookies = Cookies.get('wp-cookies-blocked');
+      if (blockedCookies) {
+        const cookies = blockedCookies.split(',').map(c => {
+          if (cookiesForm) {
+            Selector.findOne(`input[value="${c}"]`, cookiesForm).checked = false;
+          }
+          return c.trim();
+        });
+        Cookies.removeMultiple(cookies);
+      }
     }
   });
 

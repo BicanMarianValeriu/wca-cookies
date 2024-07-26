@@ -39,15 +39,16 @@ export default (function (wecodeart) {
             return cookies[name] ? decodeURIComponent(cookies[name]) : '';
         },
         set(name, value, expire = expireTime, path = cookiePath, domain) {
-            const { location: { protocol, hostname } } = document;
+            const { protocol } = window.location;
+            const domainString = domain ? `;domain=${domain}` : '';
             const isSecure = protocol === 'https:' ? ';secure' : '';
-            domain = domain || hostname;
 
-            const d = new Date();
-            d.setTime(d.getTime() + (parseInt(expire) * 24 * 60 * 60 * 1000));
+            const expireDate = new Date();
+            expireDate.setTime(expireDate.getTime() + (expire * 24 * 60 * 60 * 1000));
+            const expires = `;expires=${expireDate.toUTCString()}`;
 
-            const expires = d.toUTCString();
-            document.cookie = name + "=" + value + ";expires=" + expires + ";path=" + path + ";domain=" + domain + isSecure;
+            const cookieString = `${name}=${value}${expires};path=${path}${domainString}${isSecure}`;
+            document.cookie = cookieString;
         },
         remove(name) {
             if (Cookies.isNecessary(name)) {
@@ -58,21 +59,31 @@ export default (function (wecodeart) {
                 return;
             }
 
+            const { hostname } = window.location;
             Cookies.set(name, '', -1);
             Cookies.set(name, '', -1, '/');
+            Cookies.set(name, '', -1, '/', hostname.startsWith('www') ? hostname.substring(3) : hostname);
         },
         removeMultiple(cookies = []) {
-            cookies.forEach(c => Cookies.remove(c));
+            cookies.forEach(Cookies.remove);
         },
         isNecessary(name) {
             return necessaryArray.includes(name) || necessaryPrefixArray.some(prefix => name.match('^' + prefix + '(|.+?)'));
         },
         getChoices() {
+            let choices = [];
+
             if (!cookiesForm) {
-                return document.cookie.split(';').map(cookie => cookie.split('=')[0].trim());
+                choices = document.cookie.split(';').map(cookie => cookie.split('=')[0].trim()).filter(c => !Cookies.isNecessary(c));
+                const blockedCookies = Cookies.get('wp-cookies-blocked');
+                if (blockedCookies) {
+                    choices = [...choices, blockedCookies.split(',').map(c => c.trim())];
+                }
+
+                return choices;
             }
 
-            const choices = Selector.find('input[name="wp-cookies[]"]:not(:disabled)', cookiesForm);
+            choices = Selector.find('input[name="wp-cookies[]"]:not(:disabled)', cookiesForm);
 
             return Array.from(choices).filter(({ checked }) => checked === false).map(({ value }) => value);
         },
@@ -122,33 +133,41 @@ export default (function (wecodeart) {
         // Respect user choices
         if (!cookie) {
             // Remove cookies if no preference.
-            if(cookieBlock) {
+            if (cookieBlock) {
                 const cookies = document.cookie.split(';').map(cookie => cookie.split('=')[0].trim());
                 Cookies.removeMultiple(cookies);
                 Cookies.set('wp-cookies-blocked', cookies.filter(n => !Cookies.isNecessary(n)).toString());
             }
+
             // Disable choices for unnecessary cookies if blocked.
             if (cookiesForm) {
                 const choices = Selector.find('input[name="wp-cookies[]"]:not(:disabled)', cookiesForm);
                 choices.map(field => field.checked = false);
             }
+
             // Open cookies offcanvas.
             setTimeout(() => {
                 Selector.findOne('#wp-cookies-toggle').click();
                 console.log('WP Cookies:: Undefined preferences.');
             }, 250);
-        } else if (Cookies.get('wp-cookies-blocked') !== '') {
-            const cookies = Cookies.get('wp-cookies-blocked').split(',').map(c => {
-                if (cookiesForm) {
-                    Selector.findOne(`input[value="${c}"]`, cookiesForm).checked = false;
-                }
-                return c.trim();
-            });
-            Cookies.removeMultiple(cookies);
-        } else if(cookiesForm) {
-            // Enable choiches for unnecessary cookies if not blocked.
-            const choices = Selector.find('input[name="wp-cookies[]"]:not(:disabled)', cookiesForm);
-            choices.map(field => field.checked = true);
+        } else {
+            // Handle switches based on block.
+            if (cookiesForm) {
+                const choices = Selector.find('input[name="wp-cookies[]"]:not(:disabled)', cookiesForm);
+                choices.map(field => field.checked = cookieBlock ? false : true);
+            }
+
+            // Handle switches based on user preference.
+            const blockedCookies = Cookies.get('wp-cookies-blocked');
+            if (blockedCookies) {
+                const cookies = blockedCookies.split(',').map(c => {
+                    if (cookiesForm) {
+                        Selector.findOne(`input[value="${c}"]`, cookiesForm).checked = false;
+                    }
+                    return c.trim();
+                });
+                Cookies.removeMultiple(cookies);
+            }
         }
     });
 
