@@ -177,55 +177,24 @@ final class Cookies implements Integration {
 			\wecodeart( 'toasts' );
 			\wp_enqueue_script( 'wecodeart-support-assets-template' );
 			\wp_enqueue_script( 'wecodeart-support-assets-toast' );
-			$toast_js .= <<<JS
-				const { plugins: { Toast }, Template } = wecodeart;
-				const { toast = {} } = wecodeartSupportModulesCookies || {};
-
-				const cookieToast = (value = '') => {
-					if(!value) {
-						return;
-					}
-
-					const isConfirmed = value !== 'false';
-
-					const template = new Template({
-						content: {
-							'.wp-toast__header-text': isConfirmed ? toast?.confirm : toast?.reject,
-							'.wp-toast__body': null,
-						},
-						extraClass: isConfirmed ? 'has-success-background-color' : 'has-danger-background-color',
-						template: Selector.findOne('#wp-toast-template').innerHTML
-					}).toHtml();
-					
-					Selector.findOne('.wp-site-toasts')?.appendChild(template);
-	
-					return new Toast(template, { delay: parseInt(toast?.delay) }).show();
-				}
-
-				cookieToast(value);
-			JS;
 		}
 
 		\wp_add_inline_script( $this->make_handle(), <<<JS
 			const handleCookiesModal = () => {
-				const { Events, Selector, Cookies } = wecodeart;
-				const { classes = [] } = wecodeartSupportModulesCookies || {};
-	
-				const body = Selector.findOne('body');
 				const cookiesModal = Selector.findOne('#wp-cookies-modal');
 				
 				Events.on(cookiesModal, 'hide.wp.modal', function ({ relatedTarget = {} }) {
 					const { value } = relatedTarget?.dataset || {};
 
 					if( ['false', 'true', 'save'].includes(value) ) {
-						body.classList[value === 'false' ? 'remove' : 'add'](classes?.allow);
+						Selector.findOne('body').classList[value === 'false' ? 'remove' : 'add'](classes?.allow);
 						Cookies.setChoices(value);
+						if(toast.enable) {
+							wecodeartCookieToast(value);
+						}
 					}
-
-					${toast_js}
 				});
 			}
-
 			handleCookiesModal();
 		JS, 'after' );
 
@@ -311,8 +280,6 @@ final class Cookies implements Integration {
 				\wecodeart( 'styles' )->Utilities->load( [ 'mb-3' ] );
 				\wp_add_inline_script( $this->make_handle(), <<<JS
 					const handleCookiesFilters = () => {
-						const { Selector, Events } = wecodeart;
-
 						const cookiesModal = Selector.findOne('#wp-cookies-modal');
 						const searchInputFld = Selector.findOne('input[name="wp-cookies-search"]', cookiesModal);
 						const categoryChange = Selector.findOne('select[name="wp-cookies-categories"]', cookiesModal);
@@ -339,7 +306,6 @@ final class Cookies implements Integration {
 							allCookiesRows.filter(el=> handleUserInpt(el, searchInputFld.value ,value)).map(el => el.removeAttribute('style'));
 						});
 					}
-					
 					handleCookiesFilters();
 				JS, 'after' );
 		?>
@@ -668,6 +634,36 @@ final class Cookies implements Integration {
 				'toast'			=> get_prop( $this->config, [ 'toast' ], [] )
 			],
 		] );
+
+		\wp_add_inline_script( $this->make_handle(), <<<JS
+			const { plugins: { Toast }, Template, Selector, Events, Cookies } = wecodeart;
+			const { toast = {}, classes = [] } = wecodeartSupportModulesCookies || {};
+		JS, 'after' );
+
+		if( get_prop( $this->config, [ 'toast', 'enable' ] ) ) {
+			\wp_add_inline_script( $this->make_handle(), <<<JS
+				const wecodeartCookieToast = (value = '') => {
+					if(!value) {
+						return;
+					}
+
+					const isConfirmed = value !== 'false';
+
+					const template = new Template({
+						content: {
+							'.wp-toast__header-text': isConfirmed ? toast?.confirm : toast?.reject,
+							'.wp-toast__body': null,
+						},
+						extraClass: isConfirmed ? 'has-success-background-color' : 'has-danger-background-color',
+						template: Selector.findOne('#wp-toast-template').innerHTML
+					}).toHtml();
+					
+					Selector.findOne('.wp-site-toasts')?.appendChild(template);
+	
+					return new Toast(template, { delay: parseInt(toast?.delay) }).show();
+				}
+			JS, 'after' );
+		}
 	}
 
 	/**

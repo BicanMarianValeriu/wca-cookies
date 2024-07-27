@@ -11,7 +11,7 @@ import {
     // ModalOpts,
     TogglerOpts,
     OffcanvasOpts,
-    // NotificationsOpts
+    NotificationsOpts
 } from './Components';
 
 const {
@@ -186,9 +186,9 @@ const Options = (props) => {
                 <div className="g-col-1">
                     <TogglerOpts {...{ formData, setFormData, setStyle, colors }} />
                 </div>
-                {/* <div className="g-col-1">
+                <div className="g-col-1">
                     <NotificationsOpts {...{ formData, setFormData }} />
-                </div> */}
+                </div>
             </div>
             <Toggler {...{ formData: formData?.toggler }} />
             {/*  {isOpen && <ScanCookies formData={formData} setFormData={setFormData} createNotice={createNotice} closeModal={() => setIsOpen(false)} />} */}

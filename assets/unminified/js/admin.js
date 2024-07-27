@@ -1088,6 +1088,11 @@ const Options = props => {
     setFormData,
     setStyle,
     colors
+  })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "g-col-1"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_Components__WEBPACK_IMPORTED_MODULE_2__.NotificationsOpts, {
+    formData,
+    setFormData
   }))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_Components_Toggler__WEBPACK_IMPORTED_MODULE_1__["default"], {
     formData: formData?.toggler
   }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("hr", {

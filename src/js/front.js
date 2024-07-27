@@ -118,11 +118,15 @@ export default (function (wecodeart) {
     // Offcanvas events
     Events.on(cookiesNote, 'hide.wp.offcanvas', function ({ relatedTarget = {} }) {
         const { value } = relatedTarget?.dataset || {};
-        if (Boolean(value)) {
+        if (['false', 'true'].includes(value)) {
             body.classList.add(classes?.set);
             body.classList[value === 'true' ? 'add' : 'remove'](classes?.allow);
 
             Cookies.setChoices(value);
+            
+            if(toast.enable) {
+                wecodeartCookieToast(value);
+            }
         }
     });
 
