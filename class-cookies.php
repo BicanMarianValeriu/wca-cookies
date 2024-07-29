@@ -207,9 +207,6 @@ final class Cookies implements Integration {
 						$category 	= get_prop( $props, [ 'category' ], $necessary ? 'necessary' : 'other' );
 						$selected	= in_array( $name, $blocked, true ) ? false : true;
 						$selected	= ( $selected && $is_blocked || ! $is_allowed ) ? false : true;
-						wecodeart( 'debug' )::log( [
-							$name => $selected
-						] );
 					?><tr class="wp-cookies-table__item" data-category="<?php echo esc_attr( $category ?: 'other' ); ?>">
 						<?php if( $description = get_prop( $props, [ 'description' ] ) ) : ?>
 						<td 
