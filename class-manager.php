@@ -8,15 +8,15 @@
  * @package 	WeCodeArt Framework
  * @subpackage 	Support\Modules\Cookies\List
  * @copyright   Copyright (c) 2024, WeCodeArt Framework
- * @since 		6.4.5
- * @version		6.4.5
+ * @since 		6.5.2
+ * @version		6.5.2
  */
 
  namespace WeCodeArt\Support\Modules\Cookies;
 
 defined( 'ABSPATH' ) || exit;
 
-use WeCodeArt\Config\Traits\Singleton;
+use WeCodeArt\{ Admin, Singleton };
 use WeCodeArt\Config\Interfaces\Configuration;
 use function WeCodeArt\Functions\get_prop;
 
@@ -25,7 +25,7 @@ use function WeCodeArt\Functions\get_prop;
  *
  * @author     Bican Marian Valeriu <marianvaleriubican@gmail.com>
  */
-class Info implements Configuration {
+class Manager implements Configuration {
 
     use Singleton;
 
@@ -42,6 +42,7 @@ class Info implements Configuration {
 	 * @var array
 	 */
 	const VALID_PROPERTIES = [
+        'name',
         'category',
         'description',
         'duration'
@@ -77,52 +78,70 @@ class Info implements Configuration {
                 'description'   => __( 'WordPress also sets a few wp-settings-{time}-[UID] cookies. The number on the end is your individual user ID from the users database table. This is used to customize your view of admin interface, and possibly also the main site interface.', 'wecodeart' ),
                 'duration'      => '1 year'
             ],
-            'woocommerce_cart_hash' => [
-                'category'      => 'necessary',
-                'description'   => __( 'Stores an encoded string representing the contents of the WooCommerce shopping cart.', 'wecodeart' ),
-                'duration'      => '1 day'
-            ],
-            'woocommerce_items_in_cart' => [
-                'category'      => 'necessary',
-                'description'   => __( 'Records if there are any items in the WooCommerce shopping cart.', 'wecodeart' ),
-                'duration'      => '1 day'
-            ],
-            'lang' => [
-                'category'      => 'functional',
-                'description'   => __( 'LinkedIn sets this cookie to remember a user\'s language setting.', 'wecodeart' ),
-                'duration'      => __( 'Session', 'wecodeart' )
-            ],
-            '_ga' => [
-                'category'      => 'analytics',
-                'description'   => __( 'Google Analytics sets this cookie to calculate visitor, session and campaign data and track site usage for the site\'s analytics report. The cookie stores information anonymously and assigns a randomly generated number to recognise unique visitors.', 'wecodeart' ),
-                'duration'      => '2 years'
-            ],
-            '_gcl_au' => [
-                'category'      => 'analytics',
-                'description'   => __( 'Provided by Google Tag Manager to experiment advertisement efficiency of websites using their services.', 'wecodeart' ),
-                'duration'      => '3 months'
-            ],
-            '_gid' => [
-                'category'      => 'analytics',
-                'description'   => __( 'Installed by Google Analytics, _gid cookie stores information on how visitors use a website, while also creating an analytics report of the website\'s performance. Some of the data that are collected include the number of visitors, their source, and the pages they visit anonymously.', 'wecodeart' ),
-                'duration'      => '1 day'
-            ],
-            'CONSENT' => [
-                'category'      => 'analytics',
-                'description'   => __( 'YouTube sets this cookie via embedded youtube-videos and registers anonymous statistical data.', 'wecodeart' ),
-                'duration'      => '1 year'
-            ],
-            '_GRECAPTCHA' => [
-                'category'      => 'necessary',
-                'description'   => __( 'Cookie used by ReCaptcha functionality to allow anti-bot validation in different forms.', 'wecodeart' ),
-                'duration'      => '6 months'
-            ],
-            '_fbp' => [
-                'category'      => 'advertisements',
-                'description'   => __( 'This cookie is set by Facebook to display advertisements when either on Facebook or on a digital platform powered by Facebook advertising, after visiting the website.', 'wecodeart' ),
-                'duration'      => '3 months'
-            ],
         ];
+
+        \add_action( 'rest_api_init', [ $this, 'register_route' ], 20, 1 );
+    }
+
+    /**
+     * Register route.
+     *
+     * @return 	void
+     */
+	public function register_route(): void {
+		register_rest_route( Admin::NAMESPACE, '/manage_cookies', [
+			'methods' 				=> \WP_REST_Server::ALLMETHODS,
+			'callback'				=> [ $this, 'callback' ],
+			'permission_callback' 	=> '__return_true',
+		] );
+	}
+
+    /**
+     * Register route.
+     *
+     * @return 	WP_REST_Response
+     */
+	public function callback( \WP_REST_Request $request ): \WP_REST_Response {
+        $params     = $request->get_params();
+        list( $file_path, $data ) = $this->handle_json_file();
+
+        $modified = false;
+        if( get_prop( $params, [ 'remove' ] ) ) {
+            unset( $data[get_prop( $params, [ 'name' ] )] );
+            $this->forget( get_prop( $params, [ 'name' ] ) );
+            $modified = true;
+        } elseif( count( $params ) ) {
+            $data[get_prop( $params, [ 'name' ] )]  = wp_array_slice_assoc( $params, self::VALID_PROPERTIES );
+            $modified = true;
+        }
+        
+        if( $modified ) {
+            // Save the updated data back to the file.
+            file_put_contents( $file_path, json_encode( $data ) );
+        }
+		
+		return rest_ensure_response( $this->all() );
+	}
+
+    /**
+     * Handle JSON file
+     *
+     * @return 	array
+     */
+    public function handle_json_file(): array {
+        $upload_dir = wp_upload_dir();
+        $file_path = $upload_dir['basedir'] . '/wp-cookies.json';
+    
+        // Check if the file exists or create it.
+        if ( ! file_exists( $file_path ) ) {
+            file_put_contents( $file_path, json_encode( [] ) );
+        }
+    
+        // Get the contents of the file.
+        $file_contents = file_get_contents( $file_path );
+        $data = json_decode( $file_contents, true );
+    
+        return [ $file_path, $data ];
     }
 
     /**
@@ -188,6 +207,12 @@ class Info implements Configuration {
      * @return array
      */
     public function all(): array {
+        list( $file_path, $data ) = $this->handle_json_file();
+
+        foreach( $data as $key => $cookie ) {
+            $this->set( $key, $cookie );
+        }
+
         return $this->items;
     }
 }

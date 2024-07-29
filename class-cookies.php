@@ -8,8 +8,8 @@
  * @package 	WeCodeArt Framework
  * @subpackage 	Support\Modules\Cookies
  * @copyright   Copyright (c) 2024, WeCodeArt Framework
- * @since 		6.4.5
- * @version		6.4.5
+ * @since 		6.5.2
+ * @version		6.5.2
  */
 
 namespace WeCodeArt\Support\Modules;
@@ -50,15 +50,15 @@ final class Cookies implements Integration {
 	 */
 	protected $config;
 	protected $cookie;
-	public $list;
+	public $manager;
 
 	/**
 	 * Send to Constructor
 	 */
 	public function init() {
-		$this->cookie = [];
-		$this->config = wp_parse_args( wecodeart_option( 'cookies' ), self::get_defaults() );
-		$this->list = Cookies\Info::get_instance();
+		$this->cookie 	= [];
+		$this->config 	= wp_parse_args( wecodeart_option( 'cookies' ), self::get_defaults() );
+		$this->manager 	= Cookies\Manager::get_instance();
 	}
 
 	/**
@@ -73,8 +73,6 @@ final class Cookies implements Integration {
 		\add_action( 'wp_loaded', 						[ $this, 'block_cookies' 	] );
 		\add_filter( 'default_wp_template_part_areas', 	[ $this, 'template_area' 	] );
 		\add_filter( 'body_class', 						[ $this, 'body_class' 		] );
-
-		// Cookies\Scanner::get_instance();
 	}
 
 	/**
@@ -132,21 +130,17 @@ final class Cookies implements Integration {
 	 * @return 	string
 	 */
 	public function display_cookies(): string {
-		$info 			= Cookies\Info::get_instance();
-		$is_blocked		= get_prop( $this->config, [ 'cookies', 'block' ] ) === false;
-		// User cookies.
-		$cookies		= $this->cookie;
+		$is_blocked		= get_prop( $this->config, [ 'cookies', 'block' ] ) === true;
+		$is_allowed 	= filter_var( get_prop( $this->cookie, [ 'wp-cookies-status' ] ), FILTER_VALIDATE_BOOLEAN );
+
 		// Blocked cookies.
-		$blocked 		= array_unique( array_map( 'trim', explode( ',', get_prop( $cookies, [ 'wp-cookies-blocked' ], '' ) ) ) );
-		// Scanned cookies.
-		$scanned		= get_transient( self::CACHE ) ?: [];
-		$scanned  		= array_reduce( $scanned, fn( $carry, $v ) => array_merge( $carry, array_map( fn( $c ) => $c->name, $v ) ), [] );
+		$blocked 		= array_unique( array_map( 'trim', explode( ',', get_prop( $this->cookie, [ 'wp-cookies-blocked' ], '' ) ) ) );
 		// All cookies.
-		$cookies		= array_unique( array_merge( array_keys( $cookies ), array_filter( $blocked ), array_values( $scanned ) ) );
+		$cookies		= array_keys( $this->manager->all() );
 
 		sort( $cookies );
 
-		list( $a, $b ) 	= $this->get_necessary_cookies();
+		list( $names, $families ) 	= $this->get_necessary_cookies();
 
 		$result 	= [];
 		$necessary 	= [];
@@ -155,8 +149,8 @@ final class Cookies implements Integration {
 		// Merge cookie information
 		foreach ( $cookies as $name ) {
 			$data = wp_parse_args( [
-				'isNecessary' => $this->is_necessary_cookie( $name, $a, $b )
-			], $info->get( $name, [] ) );
+				'isNecessary' => $this->is_necessary_cookie( $name, $names, $families )
+			], $this->manager->get( $name, [] ) );
 		
 			if ( $data['isNecessary'] ) {
 				$necessary[$name] = $data;
@@ -170,8 +164,6 @@ final class Cookies implements Integration {
 		// Assets
 		\wecodeart( 'styles' )->Utilities->load( [ 'position-relative' ] );
 		\wp_enqueue_style( 'wp-block-table' );
-
-		$toast_js = '';
 
 		if( get_prop( $this->config, [ 'toast', 'enable' ] ) ) {
 			\wecodeart( 'toasts' );
@@ -212,9 +204,13 @@ final class Cookies implements Integration {
 				<tbody class="has-small-font-size"><?php
 					foreach ( $result as $name => $props ) {
 						$necessary 	= get_prop( $props, [ 'isNecessary' ] );
-						$selected	= $is_blocked ? false : true;
-						$selected	= $selected && in_array( $name, $blocked, true ) ? false : true;
-					?><tr class="wp-cookies-table__item" data-category="<?php echo esc_attr( get_prop( $props, [ 'category' ], $necessary ? 'necessary' : 'other' ) ); ?>">
+						$category 	= get_prop( $props, [ 'category' ], $necessary ? 'necessary' : 'other' );
+						$selected	= in_array( $name, $blocked, true ) ? false : true;
+						$selected	= ( $selected && $is_blocked || ! $is_allowed ) ? false : true;
+						wecodeart( 'debug' )::log( [
+							$name => $selected
+						] );
+					?><tr class="wp-cookies-table__item" data-category="<?php echo esc_attr( $category ?: 'other' ); ?>">
 						<?php if( $description = get_prop( $props, [ 'description' ] ) ) : ?>
 						<td 
 							class="wp-cookies-table__item-name has-floating"
@@ -686,6 +682,10 @@ final class Cookies implements Integration {
 
 		\wp_enqueue_script( $this->make_handle( 'admin' ) );
 
+		\wp_localize_script( $this->make_handle( 'admin' ), 'wecodeartCookies', [
+			'categories' => $this->get_categories()
+		] );
+
 		\wp_set_script_translations( $this->make_handle( 'admin' ), 'wecodeart', wecodeart_config( 'directories' )['languages'] );
 	}
 
@@ -725,9 +725,9 @@ final class Cookies implements Integration {
 					<div class="wp-block-column is-vertically-aligned-center col-12 col-sm-auto">
 						<!-- wp:buttons -->
 						<div class="wp-block-buttons">
-							<!-- wp:button {"backgroundColor":"accent","className":"js-decline","style":{"spacing":{"padding":{"top":"var:preset|spacing|xs","bottom":"var:preset|spacing|xs"}}}} -->
-							<div class="wp-block-button js-decline">
-								<a class="wp-block-button__link has-accent-background-color has-background wp-element-button" style="padding-top:var(--wp--preset--spacing--xs);padding-bottom:var(--wp--preset--spacing--xs)">' . esc_html__( 'Decline', 'wecodeart' ) . '</a>
+							<!-- wp:button {"backgroundColor":"accent","className":"js-settings","style":{"spacing":{"padding":{"top":"var:preset|spacing|xs","bottom":"var:preset|spacing|xs"}}}} -->
+							<div class="wp-block-button js-settings">
+								<a class="wp-block-button__link has-accent-background-color has-background wp-element-button" style="padding-top:var(--wp--preset--spacing--xs);padding-bottom:var(--wp--preset--spacing--xs)">' . esc_html__( 'Manage Settings', 'wecodeart' ) . '</a>
 							</div>
 							<!-- /wp:button -->
 							<!-- wp:button {"backgroundColor":"success","className":"js-accept","style":{"spacing":{"padding":{"top":"var:preset|spacing|xs","bottom":"var:preset|spacing|xs"}}}} -->
@@ -916,8 +916,10 @@ final class Cookies implements Integration {
 
 // Example API usage on how to add cookie information to container.
 // $cookies = wecodeart( 'support' )->get( 'modules/cookies' )::get_instance();
-// $cookies->list->set( [
+// $cookies->manager->set( [
 // 	'cookie' => [
-// 		'duration' 	=> '3 days',
+// 		'duration' 		=> '3 days',
+//		'description'	=> 'Description'
+//		'category'		=> 'necessary',
 // 	],
 // ] );

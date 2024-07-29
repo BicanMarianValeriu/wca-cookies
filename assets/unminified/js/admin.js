@@ -2,10 +2,10 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./inc/support/modules/cookies/src/js/Components/ModalOpts.js":
-/*!********************************************************************!*\
-  !*** ./inc/support/modules/cookies/src/js/Components/ModalOpts.js ***!
-  \********************************************************************/
+/***/ "./inc/support/modules/cookies/src/js/Components/Options/Modal.js":
+/*!************************************************************************!*\
+  !*** ./inc/support/modules/cookies/src/js/Components/Options/Modal.js ***!
+  \************************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -207,10 +207,10 @@ const ModalOpts = ({
 
 /***/ }),
 
-/***/ "./inc/support/modules/cookies/src/js/Components/NotificationsOpts.js":
-/*!****************************************************************************!*\
-  !*** ./inc/support/modules/cookies/src/js/Components/NotificationsOpts.js ***!
-  \****************************************************************************/
+/***/ "./inc/support/modules/cookies/src/js/Components/Options/Notifications.js":
+/*!********************************************************************************!*\
+  !*** ./inc/support/modules/cookies/src/js/Components/Options/Notifications.js ***!
+  \********************************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -298,10 +298,10 @@ const NotificationsOpts = ({
 
 /***/ }),
 
-/***/ "./inc/support/modules/cookies/src/js/Components/OffcanvasOpts.js":
-/*!************************************************************************!*\
-  !*** ./inc/support/modules/cookies/src/js/Components/OffcanvasOpts.js ***!
-  \************************************************************************/
+/***/ "./inc/support/modules/cookies/src/js/Components/Options/Offcanvas.js":
+/*!****************************************************************************!*\
+  !*** ./inc/support/modules/cookies/src/js/Components/Options/Offcanvas.js ***!
+  \****************************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -500,116 +500,10 @@ const OffcanvasOpts = ({
 
 /***/ }),
 
-/***/ "./inc/support/modules/cookies/src/js/Components/Toggler.js":
-/*!******************************************************************!*\
-  !*** ./inc/support/modules/cookies/src/js/Components/Toggler.js ***!
-  \******************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-
-const {
-  i18n: {
-    __
-  },
-  components: {
-    Button,
-    Tooltip,
-    Icon
-  }
-} = wp;
-const Toggler = ({
-  formData
-}) => {
-  const {
-    icon: {
-      viewBox = '0 0 512 512',
-      paths = ['M257.5 27.6c-.8-5.4-4.9-9.8-10.3-10.6v0c-22.1-3.1-44.6 .9-64.4 11.4l-74 39.5C89.1 78.4 73.2 94.9 63.4 115L26.7 190.6c-9.8 20.1-13 42.9-9.1 64.9l14.5 82.8c3.9 22.1 14.6 42.3 30.7 57.9l60.3 58.4c16.1 15.6 36.6 25.6 58.7 28.7l83 11.7c22.1 3.1 44.6-.9 64.4-11.4l74-39.5c19.7-10.5 35.6-27 45.4-47.2l36.7-75.5c9.8-20.1 13-42.9 9.1-64.9v0c-.9-5.3-5.3-9.3-10.6-10.1c-51.5-8.2-92.8-47.1-104.5-97.4c-1.8-7.6-8-13.4-15.7-14.6c-54.6-8.7-97.7-52-106.2-106.8zM208 144a32 32 0 1 1 0 64 32 32 0 1 1 0-64zM144 336a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm224-64a32 32 0 1 1 0 64 32 32 0 1 1 0-64z']
-    } = {}
-  } = formData;
-  const generateStyles = ({
-    position,
-    style: {
-      padding,
-      border = {},
-      borderRadius,
-      width,
-      height,
-      left = 'initial',
-      right = 'initial',
-      bottom = 0,
-      backgroundColor = 'transparent',
-      color = 'inherit'
-    } = {}
-  } = {}) => {
-    let style = {
-      position: 'fixed',
-      bottom,
-      width,
-      height,
-      padding,
-      color,
-      borderRadius,
-      backgroundColor,
-      left: position === 'left' ? left : 'initial',
-      right: position === 'right' ? left : 'initial',
-      transition: 'all .3s ease-in-out',
-      zIndex: 1000
-    };
-    let borderStyles = {};
-    const borderKeys = Object.keys(border);
-    const sides = ['top', 'left', 'right', 'bottom'];
-    const hasBorderMultiple = sides.some(side => borderKeys.includes(side));
-    if (hasBorderMultiple) {
-      for (const dir in border) {
-        const dirStyles = border[dir];
-        borderStyles = {
-          ...borderStyles,
-          [`border${capitalizeWord(dir)}`]: Object.values(dirStyles).join(' ')
-        };
-      }
-    } else {
-      borderStyles = {
-        border: Object.values(border).join(' ')
-      };
-    }
-    style = {
-      ...style,
-      ...borderStyles
-    };
-    return style;
-  };
-  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Tooltip, {
-    text: __('Preview', 'wecodeart')
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Button, {
-    style: generateStyles(formData)
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Icon, {
-    icon: () => {
-      return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("svg", {
-        xmlns: "http://www.w3.org/2000/svg",
-        viewBox: viewBox
-      }, paths.map(el => {
-        return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("path", {
-          fill: "currentColor",
-          d: el
-        });
-      }));
-    }
-  })));
-};
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Toggler);
-
-/***/ }),
-
-/***/ "./inc/support/modules/cookies/src/js/Components/TogglerOpts.js":
-/*!**********************************************************************!*\
-  !*** ./inc/support/modules/cookies/src/js/Components/TogglerOpts.js ***!
-  \**********************************************************************/
+/***/ "./inc/support/modules/cookies/src/js/Components/Options/Toggler.js":
+/*!**************************************************************************!*\
+  !*** ./inc/support/modules/cookies/src/js/Components/Options/Toggler.js ***!
+  \**************************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -790,6 +684,349 @@ const TogglerOpts = ({
 
 /***/ }),
 
+/***/ "./inc/support/modules/cookies/src/js/Components/Table.js":
+/*!****************************************************************!*\
+  !*** ./inc/support/modules/cookies/src/js/Components/Table.js ***!
+  \****************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+
+const {
+  i18n: {
+    __
+  },
+  components: {
+    Modal,
+    Button,
+    ButtonGroup,
+    TextControl,
+    TextareaControl,
+    SelectControl,
+    Spinner,
+    Placeholder,
+    Dashicon,
+    Tooltip
+  },
+  element: {
+    useEffect,
+    useState,
+    useRef
+  }
+} = wp;
+const {
+  categories = []
+} = wecodeartCookies || {};
+const ManageCookie = ({
+  closeModal,
+  createNotice,
+  currentCookie,
+  setCookies
+}) => {
+  const [data, setData] = useState(currentCookie !== null && currentCookie !== void 0 ? currentCookie : {});
+  const [doingAjax, setDoingAjax] = useState(null);
+  const formRef = useRef(null);
+  const handleCookie = async () => {
+    setDoingAjax(true);
+    const formData = new FormData(formRef.current);
+    if (currentCookie) {
+      // Add name for editing cookie (as the input is disabled);
+      formData.set('name', currentCookie?.name);
+    }
+    const response = await fetch(`${wecodeart.restUrl}/manage_cookies`, {
+      method: 'POST',
+      body: formData
+    });
+    const data = await response.json();
+    setCookies(data);
+    setDoingAjax(false);
+    createNotice('success', sprintf(__('Cookie %s.', 'wecodeart'), currentCookie ? __('updated', 'wecodeart') : __('added', 'wecodeart')));
+    closeModal();
+  };
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Modal, {
+    title: currentCookie ? sprintf(__('Edit "%s" cookie', 'wecodeart'), currentCookie?.name) : __('Add cookie', 'wecodeart'),
+    onRequestClose: closeModal
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("form", {
+    ref: formRef
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(TextControl, {
+    label: __('Cookie name', 'wecodeart'),
+    name: "name",
+    value: data?.name,
+    disabled: currentCookie,
+    required: true,
+    onChange: name => setData({
+      ...data,
+      name
+    })
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(TextControl, {
+    label: __('Duration', 'wecodeart'),
+    name: "duration",
+    help: __('Cookie duration - a string like: 30 days.', 'wecodeart'),
+    required: true,
+    value: data?.duration,
+    onChange: duration => setData({
+      ...data,
+      duration
+    })
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(SelectControl, {
+    label: __('Category', 'wecodeart'),
+    name: "category",
+    options: Object.keys(categories).map(key => {
+      return {
+        label: key === 'null' ? __('Select a category', 'wecodeart') : categories[key],
+        value: key === 'null' ? '' : key
+      };
+    }),
+    help: __('Cookie category to be used on filters.', 'wecodeart'),
+    required: true,
+    value: data?.category,
+    onChange: category => setData({
+      ...data,
+      category
+    })
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(TextareaControl, {
+    label: __('Description', 'wecodeart'),
+    name: "description",
+    cols: "50",
+    help: __('Cookie information related to the cookie.', 'wecodeart'),
+    required: true,
+    value: data?.description,
+    onChange: description => setData({
+      ...data,
+      description
+    })
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Button, {
+    className: "button d-flex gap-2",
+    isPrimary: true,
+    disabled: doingAjax || Object.keys(data).length < 4,
+    icon: doingAjax && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Spinner, {
+      style: {
+        margin: 0
+      }
+    }),
+    onClick: handleCookie
+  }, currentCookie ? __('Update cookie', 'wecodeart') : __('Add cookie', 'wecodeart'))));
+};
+const CookiesTable = ({
+  formData,
+  setFormData,
+  cookies,
+  setCookies,
+  createNotice
+}) => {
+  const [currentCookie, setCurrentCookie] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [doingAjax, setDoingAjax] = useState(false);
+  useEffect(() => {
+    async function fetchCookies() {
+      const response = await fetch(`${wecodeart.restUrl}/manage_cookies`, {
+        method: 'GET'
+      });
+      const data = await response.json();
+      setCookies(data);
+    }
+    fetchCookies();
+  }, []);
+  if (cookies === false) {
+    return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Placeholder, {
+      instructions: __('Loading cookies...', 'wecodeart')
+    });
+  }
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("table", {
+    className: "table table-bordered table-hover"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("thead", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("tr", {
+    style: {
+      textAlign: 'left'
+    }
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("th", null, __('Cookie name', 'wecodeart')), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("th", null, __('Description', 'wecodeart')), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("th", null, __('Duration', 'wecodeart')), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("th", null, __('Category', 'wecodeart')), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("th", {
+    style: {
+      width: '1px',
+      whiteSpace: 'nowrap'
+    }
+  }, __('Actions', 'wecodeart')))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("tbody", null, Object.keys(cookies).length ? Object.keys(cookies).map(key => {
+    const {
+      name,
+      description,
+      duration = '-',
+      category
+    } = cookies[key];
+    return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("tr", {
+      key: key
+    }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", null, name !== null && name !== void 0 ? name : key), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", null, description), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", null, duration), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", null, categories?.[category] ? categories[category] : '-'), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", null, name ? (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(ButtonGroup, {
+      style: {
+        display: 'flex'
+      }
+    }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Button, {
+      variant: "secondary",
+      isSmall: true,
+      onClick: () => {
+        setIsOpen(true);
+        setCurrentCookie(cookies[key]);
+      }
+    }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Dashicon, {
+      icon: "edit"
+    })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Button, {
+      variant: "secondary",
+      isDestructive: true,
+      isSmall: true,
+      disabled: doingAjax,
+      onClick: async () => {
+        setDoingAjax(true);
+        const formData = new FormData();
+        formData.set('name', name);
+        formData.set('remove', true);
+        const response = await fetch(`${wecodeart.restUrl}/manage_cookies`, {
+          method: 'POST',
+          body: formData
+        });
+        const data = await response.json();
+        setCookies(data);
+        setDoingAjax(false);
+        createNotice('success', sprintf(__('Cookie "%s" has been removed.', 'wecodeart'), name));
+      }
+    }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Dashicon, {
+      icon: "trash"
+    }))) : (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Tooltip, {
+      text: __('This cookie is added via API - it cannot be modified.', 'wecodeart')
+    }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Dashicon, {
+      icon: "lock"
+    }))));
+  }) : (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("tr", {
+    style: {
+      textAlign: 'center'
+    }
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("td", {
+    colSpan: 5
+  }, __('No cookies added yet - please add some using the button bellow.', 'am2'))))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Button, {
+    className: "button",
+    onClick: () => setIsOpen(true)
+  }, __('Add cookies', 'wecodeart')), isOpen && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(ManageCookie, {
+    formData,
+    setFormData,
+    createNotice,
+    currentCookie,
+    setCookies,
+    closeModal: () => {
+      setIsOpen(false);
+      setCurrentCookie(null);
+    }
+  }));
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (CookiesTable);
+
+/***/ }),
+
+/***/ "./inc/support/modules/cookies/src/js/Components/Toggler.js":
+/*!******************************************************************!*\
+  !*** ./inc/support/modules/cookies/src/js/Components/Toggler.js ***!
+  \******************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+
+const {
+  i18n: {
+    __
+  },
+  components: {
+    Button,
+    Tooltip,
+    Icon
+  }
+} = wp;
+const Toggler = ({
+  formData
+}) => {
+  const {
+    icon: {
+      viewBox = '0 0 512 512',
+      paths = ['M257.5 27.6c-.8-5.4-4.9-9.8-10.3-10.6v0c-22.1-3.1-44.6 .9-64.4 11.4l-74 39.5C89.1 78.4 73.2 94.9 63.4 115L26.7 190.6c-9.8 20.1-13 42.9-9.1 64.9l14.5 82.8c3.9 22.1 14.6 42.3 30.7 57.9l60.3 58.4c16.1 15.6 36.6 25.6 58.7 28.7l83 11.7c22.1 3.1 44.6-.9 64.4-11.4l74-39.5c19.7-10.5 35.6-27 45.4-47.2l36.7-75.5c9.8-20.1 13-42.9 9.1-64.9v0c-.9-5.3-5.3-9.3-10.6-10.1c-51.5-8.2-92.8-47.1-104.5-97.4c-1.8-7.6-8-13.4-15.7-14.6c-54.6-8.7-97.7-52-106.2-106.8zM208 144a32 32 0 1 1 0 64 32 32 0 1 1 0-64zM144 336a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm224-64a32 32 0 1 1 0 64 32 32 0 1 1 0-64z']
+    } = {}
+  } = formData;
+  const generateStyles = ({
+    position,
+    style: {
+      padding,
+      border = {},
+      borderRadius,
+      width,
+      height,
+      left = 'initial',
+      right = 'initial',
+      bottom = 0,
+      backgroundColor = 'transparent',
+      color = 'inherit'
+    } = {}
+  } = {}) => {
+    let style = {
+      position: 'fixed',
+      bottom,
+      width,
+      height,
+      padding,
+      color,
+      borderRadius,
+      backgroundColor,
+      left: position === 'left' ? left : 'initial',
+      right: position === 'right' ? left : 'initial',
+      transition: 'all .3s ease-in-out',
+      zIndex: 1000
+    };
+    let borderStyles = {};
+    const borderKeys = Object.keys(border);
+    const sides = ['top', 'left', 'right', 'bottom'];
+    const hasBorderMultiple = sides.some(side => borderKeys.includes(side));
+    if (hasBorderMultiple) {
+      for (const dir in border) {
+        const dirStyles = border[dir];
+        borderStyles = {
+          ...borderStyles,
+          [`border${capitalizeWord(dir)}`]: Object.values(dirStyles).join(' ')
+        };
+      }
+    } else {
+      borderStyles = {
+        border: Object.values(border).join(' ')
+      };
+    }
+    style = {
+      ...style,
+      ...borderStyles
+    };
+    return style;
+  };
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Tooltip, {
+    text: __('Preview', 'wecodeart')
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Button, {
+    style: generateStyles(formData)
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Icon, {
+    icon: () => {
+      return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        viewBox: viewBox
+      }, paths.map(el => {
+        return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("path", {
+          fill: "currentColor",
+          d: el
+        });
+      }));
+    }
+  })));
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Toggler);
+
+/***/ }),
+
 /***/ "./inc/support/modules/cookies/src/js/Components/index.js":
 /*!****************************************************************!*\
   !*** ./inc/support/modules/cookies/src/js/Components/index.js ***!
@@ -798,15 +1035,21 @@ const TogglerOpts = ({
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   ModalOpts: () => (/* reexport safe */ _ModalOpts__WEBPACK_IMPORTED_MODULE_0__["default"]),
-/* harmony export */   NotificationsOpts: () => (/* reexport safe */ _NotificationsOpts__WEBPACK_IMPORTED_MODULE_3__["default"]),
-/* harmony export */   OffcanvasOpts: () => (/* reexport safe */ _OffcanvasOpts__WEBPACK_IMPORTED_MODULE_2__["default"]),
-/* harmony export */   TogglerOpts: () => (/* reexport safe */ _TogglerOpts__WEBPACK_IMPORTED_MODULE_1__["default"])
+/* harmony export */   CookiesTable: () => (/* reexport safe */ _Table__WEBPACK_IMPORTED_MODULE_4__["default"]),
+/* harmony export */   ModalOpts: () => (/* reexport safe */ _Options_Modal__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   NotificationsOpts: () => (/* reexport safe */ _Options_Notifications__WEBPACK_IMPORTED_MODULE_3__["default"]),
+/* harmony export */   OffcanvasOpts: () => (/* reexport safe */ _Options_Offcanvas__WEBPACK_IMPORTED_MODULE_2__["default"]),
+/* harmony export */   Toggler: () => (/* reexport safe */ _Toggler__WEBPACK_IMPORTED_MODULE_5__["default"]),
+/* harmony export */   TogglerOpts: () => (/* reexport safe */ _Options_Toggler__WEBPACK_IMPORTED_MODULE_1__["default"])
 /* harmony export */ });
-/* harmony import */ var _ModalOpts__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ModalOpts */ "./inc/support/modules/cookies/src/js/Components/ModalOpts.js");
-/* harmony import */ var _TogglerOpts__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./TogglerOpts */ "./inc/support/modules/cookies/src/js/Components/TogglerOpts.js");
-/* harmony import */ var _OffcanvasOpts__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./OffcanvasOpts */ "./inc/support/modules/cookies/src/js/Components/OffcanvasOpts.js");
-/* harmony import */ var _NotificationsOpts__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./NotificationsOpts */ "./inc/support/modules/cookies/src/js/Components/NotificationsOpts.js");
+/* harmony import */ var _Options_Modal__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Options/Modal */ "./inc/support/modules/cookies/src/js/Components/Options/Modal.js");
+/* harmony import */ var _Options_Toggler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Options/Toggler */ "./inc/support/modules/cookies/src/js/Components/Options/Toggler.js");
+/* harmony import */ var _Options_Offcanvas__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Options/Offcanvas */ "./inc/support/modules/cookies/src/js/Components/Options/Offcanvas.js");
+/* harmony import */ var _Options_Notifications__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Options/Notifications */ "./inc/support/modules/cookies/src/js/Components/Options/Notifications.js");
+/* harmony import */ var _Table__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./Table */ "./inc/support/modules/cookies/src/js/Components/Table.js");
+/* harmony import */ var _Toggler__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./Toggler */ "./inc/support/modules/cookies/src/js/Components/Toggler.js");
+
+
 
 
 
@@ -904,8 +1147,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _Components_Toggler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Components/Toggler */ "./inc/support/modules/cookies/src/js/Components/Toggler.js");
-/* harmony import */ var _Components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Components */ "./inc/support/modules/cookies/src/js/Components/index.js");
+/* harmony import */ var _Components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Components */ "./inc/support/modules/cookies/src/js/Components/index.js");
 
 /**
  * @package: 	WeCodeArt Cookies Extension
@@ -914,8 +1156,6 @@ __webpack_require__.r(__webpack_exports__);
  * @version:	1.0.0
  */
 
-
-// import ScanCookies from './Components/Modal';
 
 const {
   i18n: {
@@ -933,6 +1173,7 @@ const {
     Spinner,
     Button,
     Notice,
+    TabPanel,
     TextControl,
     ToggleControl,
     __experimentalNumberControl: NumberControl
@@ -978,7 +1219,7 @@ const Options = props => {
   }) => cookies)(settings);
   const [loading, setLoading] = useState(null);
   const [formData, setFormData] = useState(apiOptions);
-  const [isOpen, setIsOpen] = useState(false);
+  const [cookies, setCookies] = useState(false);
   const setStyle = (extra = {}, container = 'offcanvas') => {
     const newStyle = {
       ...formData?.[container]?.style,
@@ -1015,103 +1256,131 @@ const Options = props => {
         categoryId: 'wca-cookies'
       })}" target="_blank">${__('Site Editor', 'wecodeart')}</a>`)
     }
-  })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    className: "grid",
-    style: {
-      '--wca--columns': 2
-    }
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    className: "g-col-2"
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Card, {
-    className: "border shadow-none h-100"
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(CardHeader, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("h5", {
-    className: "text-uppercase fw-medium m-0"
-  }, __('Cookies', 'wecodeart'))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(CardBody, {
-    style: {
-      color: 'rgb(30, 30, 30)'
-    }
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(ToggleControl, {
-    label: __('Block cookies', 'wecodeart'),
-    checked: formData?.cookies?.block,
-    onChange: block => setFormData({
-      ...formData,
-      cookies: {
-        ...formData?.cookies,
-        block
+  })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(TabPanel, {
+    onSelect: () => {},
+    tabs: [{
+      name: 'settings',
+      title: __('Settings', 'wecodeart'),
+      render: () => {
+        return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+          className: "grid",
+          style: {
+            '--wca--columns': 2
+          }
+        }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+          className: "g-col-2"
+        }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Card, {
+          className: "border shadow-none h-100"
+        }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(CardHeader, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("h5", {
+          className: "text-uppercase fw-medium m-0"
+        }, __('Cookies', 'wecodeart'))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(CardBody, {
+          style: {
+            color: 'rgb(30, 30, 30)'
+          }
+        }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(ToggleControl, {
+          label: __('Block cookies', 'wecodeart'),
+          checked: formData?.cookies?.block,
+          onChange: block => setFormData({
+            ...formData,
+            cookies: {
+              ...formData?.cookies,
+              block
+            }
+          }),
+          help: sprintf(__('Cookies are %s until accepted.', 'wecodeart'), formData?.cookies?.block ? __('blocked', 'wecodeart') : __('not blocked', 'wecodeart'))
+        })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(NumberControl, {
+          label: __('Expiration', 'wecodeart'),
+          value: formData?.cookies?.expire,
+          onChange: expire => setFormData({
+            ...formData,
+            cookies: {
+              ...formData?.cookies,
+              expire
+            }
+          }),
+          help: __('Duration for cookie accept|reject - in days.', 'wecodeart')
+        })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(TextControl, {
+          label: __('Necessary cookies', 'wecodeart'),
+          value: formData?.cookies?.necessary,
+          onChange: necessary => setFormData({
+            ...formData,
+            cookies: {
+              ...formData?.cookies,
+              necessary
+            }
+          }),
+          help: __('These cookies are stictly necessary and website cannot function properly without them.', 'wecodeart')
+        })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(TextControl, {
+          label: __('Necessary cookies prefix', 'wecodeart'),
+          value: formData?.cookies?.necessaryPrefix,
+          onChange: necessaryPrefix => setFormData({
+            ...formData,
+            cookies: {
+              ...formData?.cookies,
+              necessaryPrefix
+            }
+          }),
+          help: __('Cookies starting with these prefixes will also be considered necessary.', 'wecodeart')
+        }))))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+          className: "g-col-1"
+        }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_Components__WEBPACK_IMPORTED_MODULE_1__.OffcanvasOpts, {
+          formData,
+          setFormData,
+          setStyle,
+          colors
+        })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+          className: "g-col-1"
+        }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_Components__WEBPACK_IMPORTED_MODULE_1__.ModalOpts, {
+          formData,
+          setFormData,
+          setStyle,
+          colors
+        })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+          className: "g-col-1"
+        }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_Components__WEBPACK_IMPORTED_MODULE_1__.TogglerOpts, {
+          formData,
+          setFormData,
+          setStyle,
+          colors
+        })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+          className: "g-col-1"
+        }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_Components__WEBPACK_IMPORTED_MODULE_1__.NotificationsOpts, {
+          formData,
+          setFormData
+        }))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_Components__WEBPACK_IMPORTED_MODULE_1__.Toggler, {
+          formData: formData?.toggler
+        }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("hr", {
+          style: {
+            margin: '20px 0'
+          }
+        }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Button, {
+          className: "button",
+          isPrimary: true,
+          isLarge: true,
+          icon: loading && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Spinner, null),
+          onClick: () => {
+            setLoading(true);
+            saveSettings({
+              cookies: formData
+            }, handleNotice);
+          },
+          disabled: loading
+        }, loading ? '' : __('Save', 'wecodeart')));
       }
-    }),
-    help: sprintf(__('Cookies are %s until accepted.', 'wecodeart'), formData?.cookies?.block ? __('blocked', 'wecodeart') : __('not blocked', 'wecodeart'))
-  })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(NumberControl, {
-    label: __('Expiration', 'wecodeart'),
-    value: formData?.cookies?.expire,
-    onChange: expire => setFormData({
-      ...formData,
-      cookies: {
-        ...formData?.cookies,
-        expire
-      }
-    }),
-    help: __('Duration for cookie accept|reject - in days.', 'wecodeart')
-  })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(TextControl, {
-    label: __('Necessary cookies', 'wecodeart'),
-    value: formData?.cookies?.necessary,
-    onChange: necessary => setFormData({
-      ...formData,
-      cookies: {
-        ...formData?.cookies,
-        necessary
-      }
-    }),
-    help: __('These cookies are stictly necessary and website cannot function properly without them.', 'wecodeart')
-  })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(TextControl, {
-    label: __('Necessary cookies prefix', 'wecodeart'),
-    value: formData?.cookies?.necessaryPrefix,
-    onChange: necessaryPrefix => setFormData({
-      ...formData,
-      cookies: {
-        ...formData?.cookies,
-        necessaryPrefix
-      }
-    }),
-    help: __('Cookies starting with these prefixes will also be considered necessary.', 'wecodeart')
-  }))))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    className: "g-col-1"
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_Components__WEBPACK_IMPORTED_MODULE_2__.OffcanvasOpts, {
-    formData,
-    setFormData,
-    setStyle,
-    colors
-  })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    className: "g-col-1"
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_Components__WEBPACK_IMPORTED_MODULE_2__.TogglerOpts, {
-    formData,
-    setFormData,
-    setStyle,
-    colors
-  })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    className: "g-col-1"
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_Components__WEBPACK_IMPORTED_MODULE_2__.NotificationsOpts, {
-    formData,
-    setFormData
-  }))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_Components_Toggler__WEBPACK_IMPORTED_MODULE_1__["default"], {
-    formData: formData?.toggler
-  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("hr", {
-    style: {
-      margin: '20px 0'
-    }
-  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Button, {
-    className: "button",
-    isPrimary: true,
-    isLarge: true,
-    icon: loading && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Spinner, null),
-    onClick: () => {
-      setLoading(true);
-      saveSettings({
-        cookies: formData
-      }, handleNotice);
-    },
-    disabled: loading
-  }, loading ? '' : __('Save', 'wecodeart')));
+    }, {
+      name: 'cookies',
+      title: __('Cookies', 'wecodeart'),
+      render: (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_Components__WEBPACK_IMPORTED_MODULE_1__.CookiesTable, {
+        formData,
+        setFormData,
+        cookies,
+        setCookies,
+        createNotice
+      })
+    }]
+  }, ({
+    render
+  }) => render));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Options);
 })();

@@ -5,10 +5,10 @@
  * @version:	1.0.0
  */
 
-import Toggler from './Components/Toggler';
-// import ScanCookies from './Components/Modal';
 import {
-    // ModalOpts,
+    Toggler,
+    CookiesTable,
+    ModalOpts,
     TogglerOpts,
     OffcanvasOpts,
     NotificationsOpts
@@ -30,6 +30,7 @@ const {
         Spinner,
         Button,
         Notice,
+        TabPanel,
         TextControl,
         ToggleControl,
         __experimentalNumberControl: NumberControl,
@@ -72,7 +73,7 @@ const Options = (props) => {
     const apiOptions = (({ cookies }) => (cookies))(settings);
     const [loading, setLoading] = useState(null);
     const [formData, setFormData] = useState(apiOptions);
-    const [isOpen, setIsOpen] = useState(false);
+    const [cookies, setCookies] = useState(false);
 
     const setStyle = (extra = {}, container = 'offcanvas') => {
         const newStyle = { ...formData?.[container]?.style, ...extra };
@@ -111,101 +112,126 @@ const Options = (props) => {
                     }} />
                 </Notice>
             )}
-            <div className="grid" style={{ '--wca--columns': 2 }}>
-                <div className="g-col-2">
-                    <Card className="border shadow-none h-100">
-                        <CardHeader>
-                            <h5 className="text-uppercase fw-medium m-0">{__('Cookies', 'wecodeart')}</h5>
-                            {/* <Button className="button" onClick={() => setIsOpen(true)}>{__('Detect cookies', 'wecodeart')}</Button> */}
-                        </CardHeader>
-                        <CardBody style={{ color: 'rgb(30, 30, 30)' }}>
-                            <p>
-                                <ToggleControl
-                                    label={__('Block cookies', 'wecodeart')}
-                                    checked={formData?.cookies?.block}
-                                    onChange={block => setFormData({
-                                        ...formData, cookies: {
-                                            ...formData?.cookies,
-                                            block
-                                        }
-                                    })}
-                                    help={sprintf(
-                                        __('Cookies are %s until accepted.', 'wecodeart'),
-                                        formData?.cookies?.block ? __('blocked', 'wecodeart') : __('not blocked', 'wecodeart')
-                                    )}
-                                />
-                            </p>
-                            <p>
-                                <NumberControl
-                                    label={__('Expiration', 'wecodeart')}
-                                    value={formData?.cookies?.expire}
-                                    onChange={expire => setFormData({
-                                        ...formData, cookies: {
-                                            ...formData?.cookies,
-                                            expire
-                                        }
-                                    })}
-                                    help={__('Duration for cookie accept|reject - in days.', 'wecodeart')}
-                                />
-                            </p>
-                            <p>
-                                <TextControl
-                                    label={__('Necessary cookies', 'wecodeart')}
-                                    value={formData?.cookies?.necessary}
-                                    onChange={necessary => setFormData({
-                                        ...formData, cookies: {
-                                            ...formData?.cookies,
-                                            necessary
-                                        }
-                                    })}
-                                    help={__('These cookies are stictly necessary and website cannot function properly without them.', 'wecodeart')}
-                                />
-                            </p>
-                            <p>
-                                <TextControl
-                                    label={__('Necessary cookies prefix', 'wecodeart')}
-                                    value={formData?.cookies?.necessaryPrefix}
-                                    onChange={necessaryPrefix => setFormData({
-                                        ...formData, cookies: {
-                                            ...formData?.cookies,
-                                            necessaryPrefix
-                                        }
-                                    })}
-                                    help={__('Cookies starting with these prefixes will also be considered necessary.', 'wecodeart')}
-                                />
-                            </p>
-                        </CardBody>
-                    </Card>
-                </div>
-                <div className="g-col-1">
-                    <OffcanvasOpts {...{ formData, setFormData, setStyle, colors }} />
-                </div>
-                {/* <div className="g-col-1">
-                    <ModalOpts {...{ formData, setFormData, setStyle, colors }} />
-                </div> */}
-                <div className="g-col-1">
-                    <TogglerOpts {...{ formData, setFormData, setStyle, colors }} />
-                </div>
-                <div className="g-col-1">
-                    <NotificationsOpts {...{ formData, setFormData }} />
-                </div>
-            </div>
-            <Toggler {...{ formData: formData?.toggler }} />
-            {/*  {isOpen && <ScanCookies formData={formData} setFormData={setFormData} createNotice={createNotice} closeModal={() => setIsOpen(false)} />} */}
-            <hr style={{ margin: '20px 0' }} />
-            <Button
-                className="button"
-                isPrimary
-                isLarge
-                icon={loading && <Spinner />}
-                onClick={() => {
-                    setLoading(true);
-                    saveSettings({ cookies: formData }, handleNotice);
-                }}
-                {...{ disabled: loading }}
-            >
-                {loading ? '' : __('Save', 'wecodeart')}
-            </Button>
+            <TabPanel
+                onSelect={() => { }}
+                tabs={[
+                    {
+                        name: 'settings',
+                        title: __('Settings', 'wecodeart'),
+                        render: () => {
+                            return (
+                                <>
+                                    <div className="grid" style={{ '--wca--columns': 2 }}>
+                                        <div className="g-col-2">
+                                            <Card className="border shadow-none h-100">
+                                                <CardHeader>
+                                                    <h5 className="text-uppercase fw-medium m-0">{__('Cookies', 'wecodeart')}</h5>
+                                                </CardHeader>
+                                                <CardBody style={{ color: 'rgb(30, 30, 30)' }}>
+                                                    <p>
+                                                        <ToggleControl
+                                                            label={__('Block cookies', 'wecodeart')}
+                                                            checked={formData?.cookies?.block}
+                                                            onChange={block => setFormData({
+                                                                ...formData, cookies: {
+                                                                    ...formData?.cookies,
+                                                                    block
+                                                                }
+                                                            })}
+                                                            help={sprintf(
+                                                                __('Cookies are %s until accepted.', 'wecodeart'),
+                                                                formData?.cookies?.block ? __('blocked', 'wecodeart') : __('not blocked', 'wecodeart')
+                                                            )}
+                                                        />
+                                                    </p>
+                                                    <p>
+                                                        <NumberControl
+                                                            label={__('Expiration', 'wecodeart')}
+                                                            value={formData?.cookies?.expire}
+                                                            onChange={expire => setFormData({
+                                                                ...formData, cookies: {
+                                                                    ...formData?.cookies,
+                                                                    expire
+                                                                }
+                                                            })}
+                                                            help={__('Duration for cookie accept|reject - in days.', 'wecodeart')}
+                                                        />
+                                                    </p>
+                                                    <p>
+                                                        <TextControl
+                                                            label={__('Necessary cookies', 'wecodeart')}
+                                                            value={formData?.cookies?.necessary}
+                                                            onChange={necessary => setFormData({
+                                                                ...formData, cookies: {
+                                                                    ...formData?.cookies,
+                                                                    necessary
+                                                                }
+                                                            })}
+                                                            help={__('These cookies are stictly necessary and website cannot function properly without them.', 'wecodeart')}
+                                                        />
+                                                    </p>
+                                                    <p>
+                                                        <TextControl
+                                                            label={__('Necessary cookies prefix', 'wecodeart')}
+                                                            value={formData?.cookies?.necessaryPrefix}
+                                                            onChange={necessaryPrefix => setFormData({
+                                                                ...formData, cookies: {
+                                                                    ...formData?.cookies,
+                                                                    necessaryPrefix
+                                                                }
+                                                            })}
+                                                            help={__('Cookies starting with these prefixes will also be considered necessary.', 'wecodeart')}
+                                                        />
+                                                    </p>
+                                                </CardBody>
+                                            </Card>
+                                        </div>
+                                        <div className="g-col-1">
+                                            <OffcanvasOpts {...{ formData, setFormData, setStyle, colors }} />
+                                        </div>
+                                        <div className="g-col-1">
+                                            <ModalOpts {...{ formData, setFormData, setStyle, colors }} />
+                                        </div>
+                                        <div className="g-col-1">
+                                            <TogglerOpts {...{ formData, setFormData, setStyle, colors }} />
+                                        </div>
+                                        <div className="g-col-1">
+                                            <NotificationsOpts {...{ formData, setFormData }} />
+                                        </div>
+                                    </div>
+                                    <Toggler {...{ formData: formData?.toggler }} />
+                                    <hr style={{ margin: '20px 0' }} />
+                                    <Button
+                                        className="button"
+                                        isPrimary
+                                        isLarge
+                                        icon={loading && <Spinner />}
+                                        onClick={() => {
+                                            setLoading(true);
+                                            saveSettings({ cookies: formData }, handleNotice);
+                                        }}
+                                        {...{ disabled: loading }}
+                                    >
+                                        {loading ? '' : __('Save', 'wecodeart')}
+                                    </Button>
+                                </>
+                            );
+                        }
+                    },
+                    {
+                        name: 'cookies',
+                        title: __('Cookies', 'wecodeart'),
+                        render: <CookiesTable {...{
+                            formData,
+                            setFormData,
+                            cookies,
+                            setCookies,
+                            createNotice
+                        }} />
+                    }
+                ]}>
+                {({ render }) => render}
+            </TabPanel>
         </>
     );
 };
