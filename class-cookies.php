@@ -861,7 +861,7 @@ final class Cookies implements Integration {
 			],
 			'offcanvas'		=> [
 				'position'	=> 'bottom',
-				'scroll'	=> true,
+				'scroll'	=> false,
 				'backdrop'	=> true,
 				'keyboard'	=> false,
 				'close' 	=> false,
@@ -872,13 +872,13 @@ final class Cookies implements Integration {
 				]
 			],
 			'modal'			=> [
-				'position'	=> 'centered',
-				'scroll'	=> true,
-				'backdrop'	=> 'static',
-				'keyboard'	=> false,
-				'close' 	=> false,
-				'title' 	=> esc_html__( 'Your privacy policy', 'wecodeart' ),
-				'style'		=> [
+				'position'		=> 'centered',
+				'backdrop'		=> 'static',
+				'closeOffcanvas'=> true,
+				'close' 		=> true,
+				'keyboard'		=> false,
+				'title' 		=> esc_html__( 'Your privacy policy', 'wecodeart' ),
+				'style'			=> [
 					'backgroundColor' => '',
 					'color'	=> ''
 				]
