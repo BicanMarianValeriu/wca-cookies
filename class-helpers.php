@@ -8,8 +8,8 @@
  * @package 	WeCodeArt Framework
  * @subpackage 	Support\Modules\Cookies
  * @copyright   Copyright (c) 2024, WeCodeArt Framework
- * @since 		6.4.5
- * @version		6.4.5
+ * @since 		6.5.2
+ * @version		6.5.2
  */
 
 namespace WeCodeArt\Support\Modules\Cookies;

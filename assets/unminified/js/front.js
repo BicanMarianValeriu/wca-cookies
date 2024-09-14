@@ -162,10 +162,13 @@ __webpack_require__.r(__webpack_exports__);
     const {
       value
     } = relatedTarget?.dataset || {};
-    if (Boolean(value)) {
+    if (['false', 'true'].includes(value)) {
       body.classList.add(classes?.set);
       body.classList[value === 'true' ? 'add' : 'remove'](classes?.allow);
       Cookies.setChoices(value);
+      if (toast.enable) {
+        wecodeartCookieToast(value);
+      }
     }
   });
 
@@ -181,7 +184,7 @@ __webpack_require__.r(__webpack_exports__);
         const cookies = blockedCookies.split(',').map(c => c.trim());
         Cookies.removeMultiple(cookies);
 
-        // Handle switches based on block.
+        // Handle switches based on block (for cache).
         if (cookiesForm) {
           const choices = Selector.find('input[name="wp-cookies[]"]:not(:disabled)', cookiesForm);
           choices.map(field => field.checked = cookies.includes(field.value) ? false : true);
@@ -195,7 +198,7 @@ __webpack_require__.r(__webpack_exports__);
         Cookies.set('wp-cookies-blocked', cookies.filter(n => !Cookies.isNecessary(n)).toString());
       }
 
-      // Disable choices for unnecessary cookies if form exists.
+      // Adjust choices if form exists (for cache).
       if (cookiesForm) {
         const choices = Selector.find('input[name="wp-cookies[]"]:not(:disabled)', cookiesForm);
         choices.map(field => field.checked = cookieBlock ? false : true);
