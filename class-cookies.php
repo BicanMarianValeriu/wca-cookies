@@ -9,7 +9,7 @@
  * @subpackage 	Support\Modules\Cookies
  * @copyright   Copyright (c) 2024, WeCodeArt Framework
  * @since 		6.5.2
- * @version		6.5.2
+ * @version		6.5.3
  */
 
 namespace WeCodeArt\Support\Modules;
@@ -179,8 +179,12 @@ final class Cookies implements Integration {
 					const { value } = relatedTarget?.dataset || {};
 
 					if( ['false', 'true', 'save'].includes(value) ) {
+						const { Cookies } = wecodeart;
+
 						Selector.findOne('body').classList[value === 'false' ? 'remove' : 'add'](classes?.allow);
+						
 						Cookies.setChoices(value);
+						
 						if(toast.enable) {
 							wecodeartCookieToast(value);
 						}
@@ -270,7 +274,7 @@ final class Cookies implements Integration {
 		ob_start();
 		switch( $module ) :
 			case 'filters':
-				\wecodeart( 'styles' )->Utilities->load( [ 'mb-3' ] );
+				\wecodeart( 'styles' )->Utilities->load( [ 'my-3' ] );
 				\wp_add_inline_script( $this->make_handle(), <<<JS
 					const handleCookiesFilters = () => {
 						const cookiesModal = Selector.findOne('#wp-cookies-modal');
@@ -302,7 +306,7 @@ final class Cookies implements Integration {
 					handleCookiesFilters();
 				JS, 'after' );
 		?>
-		<div class="grid mb-3" style="--wp--columns: 2">
+		<div class="grid my-3" style="--wp--columns: 2">
 			<?php
 					
 				\wecodeart_input( 'floating', [
@@ -629,7 +633,7 @@ final class Cookies implements Integration {
 		] );
 
 		\wp_add_inline_script( $this->make_handle(), <<<JS
-			const { plugins: { Toast }, Template, Selector, Events, Cookies } = wecodeart;
+			const { plugins: { Toast }, Template, Selector, Events } = wecodeart;
 			const { toast = {}, classes = [] } = wecodeartSupportModulesCookies || {};
 		JS, 'after' );
 
