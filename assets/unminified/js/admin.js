@@ -728,7 +728,12 @@ const ManageCookie = ({
   currentCookie,
   setCookies
 }) => {
-  const [data, setData] = useState(currentCookie !== null && currentCookie !== void 0 ? currentCookie : {});
+  const [data, setData] = useState(currentCookie !== null && currentCookie !== void 0 ? currentCookie : {
+    name: '',
+    duration: '',
+    category: '',
+    description: ''
+  });
   const [doingAjax, setDoingAjax] = useState(null);
   const formRef = useRef(null);
   const handleCookie = async () => {
@@ -748,6 +753,7 @@ const ManageCookie = ({
     createNotice('success', sprintf(__('Cookie %s.', 'wecodeart'), currentCookie ? __('updated', 'wecodeart') : __('added', 'wecodeart')));
     closeModal();
   };
+  const objectHasEmptyValues = obj => Object.keys(obj).filter(key => obj[key] === '').length;
   return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Modal, {
     title: currentCookie ? sprintf(__('Edit "%s" cookie', 'wecodeart'), currentCookie?.name) : __('Add cookie', 'wecodeart'),
     onRequestClose: closeModal
@@ -779,7 +785,8 @@ const ManageCookie = ({
     options: Object.keys(categories).map(key => {
       return {
         label: key === 'null' ? __('Select a category', 'wecodeart') : categories[key],
-        value: key === 'null' ? '' : key
+        value: key === 'null' ? '' : key,
+        disabled: key === 'null'
       };
     }),
     help: __('Cookie category to be used on filters.', 'wecodeart'),
@@ -803,7 +810,7 @@ const ManageCookie = ({
   }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Button, {
     className: "button d-flex gap-2",
     isPrimary: true,
-    disabled: doingAjax || Object.keys(data).length < 4,
+    disabled: doingAjax || objectHasEmptyValues(data),
     icon: doingAjax && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Spinner, {
       style: {
         margin: 0
@@ -1259,8 +1266,90 @@ const Options = props => {
   })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(TabPanel, {
     onSelect: () => {},
     tabs: [{
+      name: 'cookies',
+      title: __('Cookies', 'wecodeart'),
+      render: (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Card, {
+        className: "border shadow-none"
+      }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(CardHeader, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("h5", {
+        className: "text-uppercase fw-medium m-0"
+      }, __('Cookies', 'wecodeart'))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(CardBody, {
+        style: {
+          color: 'rgb(30, 30, 30)'
+        }
+      }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(ToggleControl, {
+        label: __('Block cookies', 'wecodeart'),
+        checked: formData?.cookies?.block,
+        onChange: block => setFormData({
+          ...formData,
+          cookies: {
+            ...formData?.cookies,
+            block
+          }
+        }),
+        help: sprintf(__('Cookies are %s until preference is set.', 'wecodeart'), formData?.cookies?.block ? __('blocked', 'wecodeart') : __('not blocked', 'wecodeart'))
+      })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(NumberControl, {
+        label: __('Expiration', 'wecodeart'),
+        value: formData?.cookies?.expire,
+        onChange: expire => setFormData({
+          ...formData,
+          cookies: {
+            ...formData?.cookies,
+            expire
+          }
+        }),
+        help: __('Duration for cookie accept|reject - in days.', 'wecodeart')
+      })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(TextControl, {
+        label: __('Necessary cookies', 'wecodeart'),
+        value: formData?.cookies?.necessary,
+        onChange: necessary => setFormData({
+          ...formData,
+          cookies: {
+            ...formData?.cookies,
+            necessary
+          }
+        }),
+        help: __('These cookies are stictly necessary and website cannot function properly without them.', 'wecodeart')
+      })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(TextControl, {
+        label: __('Necessary cookies prefix', 'wecodeart'),
+        value: formData?.cookies?.necessaryPrefix,
+        onChange: necessaryPrefix => setFormData({
+          ...formData,
+          cookies: {
+            ...formData?.cookies,
+            necessaryPrefix
+          }
+        }),
+        help: __('Cookies starting with these prefixes will also be considered necessary.', 'wecodeart')
+      })))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("hr", {
+        style: {
+          margin: '20px 0'
+        }
+      }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Button, {
+        className: "button",
+        isPrimary: true,
+        isLarge: true,
+        icon: loading && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Spinner, null),
+        onClick: () => {
+          setLoading(true);
+          saveSettings({
+            cookies: formData
+          }, handleNotice);
+        },
+        disabled: loading
+      }, loading ? '' : __('Save', 'wecodeart')), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("hr", {
+        style: {
+          margin: '20px 0'
+        }
+      }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_Components__WEBPACK_IMPORTED_MODULE_1__.CookiesTable, {
+        formData,
+        setFormData,
+        cookies,
+        setCookies,
+        createNotice
+      }))
+    }, {
       name: 'settings',
-      title: __('Settings', 'wecodeart'),
+      title: __('Design', 'wecodeart'),
       render: () => {
         return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
           className: "grid",
@@ -1268,60 +1357,6 @@ const Options = props => {
             '--wca--columns': 2
           }
         }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-          className: "g-col-2"
-        }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Card, {
-          className: "border shadow-none h-100"
-        }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(CardHeader, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("h5", {
-          className: "text-uppercase fw-medium m-0"
-        }, __('Cookies', 'wecodeart'))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(CardBody, {
-          style: {
-            color: 'rgb(30, 30, 30)'
-          }
-        }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(ToggleControl, {
-          label: __('Block cookies', 'wecodeart'),
-          checked: formData?.cookies?.block,
-          onChange: block => setFormData({
-            ...formData,
-            cookies: {
-              ...formData?.cookies,
-              block
-            }
-          }),
-          help: sprintf(__('Cookies are %s until accepted.', 'wecodeart'), formData?.cookies?.block ? __('blocked', 'wecodeart') : __('not blocked', 'wecodeart'))
-        })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(NumberControl, {
-          label: __('Expiration', 'wecodeart'),
-          value: formData?.cookies?.expire,
-          onChange: expire => setFormData({
-            ...formData,
-            cookies: {
-              ...formData?.cookies,
-              expire
-            }
-          }),
-          help: __('Duration for cookie accept|reject - in days.', 'wecodeart')
-        })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(TextControl, {
-          label: __('Necessary cookies', 'wecodeart'),
-          value: formData?.cookies?.necessary,
-          onChange: necessary => setFormData({
-            ...formData,
-            cookies: {
-              ...formData?.cookies,
-              necessary
-            }
-          }),
-          help: __('These cookies are stictly necessary and website cannot function properly without them.', 'wecodeart')
-        })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(TextControl, {
-          label: __('Necessary cookies prefix', 'wecodeart'),
-          value: formData?.cookies?.necessaryPrefix,
-          onChange: necessaryPrefix => setFormData({
-            ...formData,
-            cookies: {
-              ...formData?.cookies,
-              necessaryPrefix
-            }
-          }),
-          help: __('Cookies starting with these prefixes will also be considered necessary.', 'wecodeart')
-        }))))), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
           className: "g-col-1"
         }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_Components__WEBPACK_IMPORTED_MODULE_1__.OffcanvasOpts, {
           formData,
@@ -1367,16 +1402,6 @@ const Options = props => {
           disabled: loading
         }, loading ? '' : __('Save', 'wecodeart')));
       }
-    }, {
-      name: 'cookies',
-      title: __('Cookies', 'wecodeart'),
-      render: (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_Components__WEBPACK_IMPORTED_MODULE_1__.CookiesTable, {
-        formData,
-        setFormData,
-        cookies,
-        setCookies,
-        createNotice
-      })
     }]
   }, ({
     render
