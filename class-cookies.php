@@ -115,15 +115,11 @@ final class Cookies implements Integration {
 		$allowed 	= get_prop( $_COOKIE, [ 'wp-cookies-status' ] );
 		$blocked 	= get_prop( $_COOKIE, [ 'wp-cookies-blocked' ] );
 		$blocking 	= get_prop( $this->config, [ 'cookies', 'block' ] );
-
-		if( ! $blocking ) {
-			return;
-		}
 	
-		if ( ( ! $allowed ) || filter_var( $allowed, FILTER_VALIDATE_BOOLEAN ) === false ) {
+		if ( ( ! $allowed && $blocking ) || filter_var( $allowed, FILTER_VALIDATE_BOOLEAN ) === false ) {
 			// Block cookies if not accepted yet or declined
 			$this->remove_specific_cookies();
-		} elseif ( ! empty( $blocked ) ) {
+		} elseif ( $blocking && ! empty( $blocked ) ) {
 			// Block user defined cookies if accepted
 			$this->remove_specific_cookies( $blocked );
 		}
