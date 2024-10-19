@@ -112,11 +112,16 @@ final class Cookies implements Integration {
 			return;
 		}
 	
-		$allowed = get_prop( $_COOKIE, [ 'wp-cookies-status' ] );
-		$blocked = get_prop( $_COOKIE, [ 'wp-cookies-blocked' ] );
+		$allowed 	= get_prop( $_COOKIE, [ 'wp-cookies-status' ] );
+		$blocked 	= get_prop( $_COOKIE, [ 'wp-cookies-blocked' ] );
+		$blocking 	= get_prop( $this->config, [ 'cookies', 'block' ] );
+
+		if( ! $blocking ) {
+			return;
+		}
 	
-		if ( ( ! $allowed && get_prop( $this->config, [ 'cookies', 'block' ] ) ) || filter_var( $allowed, FILTER_VALIDATE_BOOLEAN ) === false ) {
-			// Block cookies if not accepted or declined
+		if ( ( ! $allowed ) || filter_var( $allowed, FILTER_VALIDATE_BOOLEAN ) === false ) {
+			// Block cookies if not accepted yet or declined
 			$this->remove_specific_cookies();
 		} elseif ( ! empty( $blocked ) ) {
 			// Block user defined cookies if accepted
@@ -130,8 +135,8 @@ final class Cookies implements Integration {
 	 * @return 	string
 	 */
 	public function display_cookies(): string {
-		$is_blocked		= get_prop( $this->config, [ 'cookies', 'block' ] ) === true;
-		$is_allowed 	= filter_var( get_prop( $this->cookie, [ 'wp-cookies-status' ] ), FILTER_VALIDATE_BOOLEAN );
+		$will_block	= get_prop( $this->config, [ 'cookies', 'block' ] ) === true;
+		$is_allowed	= filter_var( get_prop( $this->cookie, [ 'wp-cookies-status' ] ), FILTER_VALIDATE_BOOLEAN );
 
 		// Blocked cookies.
 		$blocked 		= array_unique( array_map( 'trim', explode( ',', get_prop( $this->cookie, [ 'wp-cookies-blocked' ], '' ) ) ) );
@@ -209,8 +214,8 @@ final class Cookies implements Integration {
 					foreach ( $result as $name => $props ) {
 						$necessary 	= get_prop( $props, [ 'isNecessary' ] );
 						$category 	= get_prop( $props, [ 'category' ], $necessary ? 'necessary' : 'other' );
-						$selected	= in_array( $name, $blocked, true ) ? false : true;
-						$selected	= ( $selected && $is_blocked || ! $is_allowed ) ? false : true;
+						$in_blocked	= in_array( $name, $blocked, true );
+						$selected	= ( ! $is_allowed || $will_block && $in_blocked ) ? false : true;
 					?><tr class="wp-cookies-table__item" data-category="<?php echo esc_attr( $category ?: 'other' ); ?>">
 						<?php if( $description = get_prop( $props, [ 'description' ] ) ) : ?>
 						<td 

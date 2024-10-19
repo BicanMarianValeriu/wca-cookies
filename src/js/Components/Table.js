@@ -24,7 +24,7 @@ const {
 const { categories = [] } = wecodeartCookies || {};
 
 const ManageCookie = ({ closeModal, createNotice, currentCookie, setCookies }) => {
-    const [data, setData] = useState(currentCookie ?? {});
+    const [data, setData] = useState(currentCookie ?? { name: '', duration: '', category: '', description: '' });
     const [doingAjax, setDoingAjax] = useState(null);
     const formRef = useRef(null);
 
@@ -52,6 +52,8 @@ const ManageCookie = ({ closeModal, createNotice, currentCookie, setCookies }) =
         closeModal();
     };
 
+    const objectHasEmptyValues = (obj) => Object.keys(obj).filter(key => obj[key] === '').length;
+
     return (
         <Modal title={currentCookie ? sprintf(__('Edit "%s" cookie', 'wecodeart'), currentCookie?.name) : __('Add cookie', 'wecodeart')} onRequestClose={closeModal}>
             <form ref={formRef}>
@@ -77,7 +79,8 @@ const ManageCookie = ({ closeModal, createNotice, currentCookie, setCookies }) =
                     options={Object.keys(categories).map(key => {
                         return {
                             label: key === 'null' ? __('Select a category', 'wecodeart') : categories[key],
-                            value: key === 'null' ? '' : key
+                            value: key === 'null' ? '' : key,
+                            disabled: key === 'null'
                         }
                     })}
                     help={__('Cookie category to be used on filters.', 'wecodeart')}
@@ -97,7 +100,7 @@ const ManageCookie = ({ closeModal, createNotice, currentCookie, setCookies }) =
                 <Button
                     className="button d-flex gap-2"
                     isPrimary
-                    disabled={doingAjax || Object.keys(data).length < 4}
+                    disabled={doingAjax || objectHasEmptyValues(data)}
                     icon={doingAjax && <Spinner style={{ margin: 0 }} />}
                     onClick={handleCookie}
                 >
