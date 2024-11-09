@@ -215,13 +215,13 @@ final class Cookies implements Integration {
 					?><tr class="wp-cookies-table__item" data-category="<?php echo esc_attr( $category ?: 'other' ); ?>">
 						<?php if( $description = get_prop( $props, [ 'description' ] ) ) : ?>
 						<td 
-							class="wp-cookies-table__item-name has-floating"
+							class="wp-cookies-table__item-name has-floating notranslate"
 							data-wp-context="<?php echo esc_attr( toJSON( [
 								'container'	=> '#wp-cookies-modal',
 								'title'		=> $description,
 							] ) ); ?>"
 						>
-						<?php else : ?><td class="wp-cookies-table__item-name"><?php
+						<?php else : ?><td class="wp-cookies-table__item-name notranslate"><?php
 						
 						endif;
 
@@ -921,7 +921,7 @@ final class Cookies implements Integration {
 // $cookies->manager->set( [
 // 	'cookie' => [
 // 		'duration' 		=> '3 days',
-//		'description'	=> 'Description'
+//		'description'	=> 'Description',
 //		'category'		=> 'necessary',
 // 	],
 // ] );
