@@ -9,7 +9,7 @@
  * @subpackage 	Support\Modules\Cookies
  * @copyright   Copyright (c) 2024, WeCodeArt Framework
  * @since 		6.5.2
- * @version		6.5.3
+ * @version		6.5.5
  */
 
 namespace WeCodeArt\Support\Modules;
@@ -392,6 +392,7 @@ final class Cookies implements Integration {
 
 		// Process actions
 		$p = wecodeart( 'dom' )::processor( $template );
+		$p->next_tag();
 		$p->set_bookmark( 'dom-start' );
 			
 		if( $p->next_tag( [
