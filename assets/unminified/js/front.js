@@ -1,7 +1,44 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
-/******/ 	// The require scope
-/******/ 	var __webpack_require__ = {};
+/******/ 	var __webpack_modules__ = ({
+
+/***/ "./inc/support/modules/cookies/src/scss/index.scss":
+/*!*********************************************************!*\
+  !*** ./inc/support/modules/cookies/src/scss/index.scss ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ })
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
 /******/ 	
 /************************************************************************/
 /******/ 	/* webpack/runtime/define property getters */
@@ -34,6 +71,8 @@
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
+// This entry needs to be wrapped in an IIFE because it needs to be isolated against other modules in the chunk.
+(() => {
 /*!*****************************************************!*\
   !*** ./inc/support/modules/cookies/src/js/front.js ***!
   \*****************************************************/
@@ -41,6 +80,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+/* harmony import */ var _scss_index_scss__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./../scss/index.scss */ "./inc/support/modules/cookies/src/scss/index.scss");
 /**
  * --------------------------------------------------------------------------
  * Cookies Module
@@ -49,6 +89,7 @@ __webpack_require__.r(__webpack_exports__);
  * @version 1.0.0
  * --------------------------------------------------------------------------
  */
+
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((function (wecodeart) {
   const {
     Events,
@@ -66,8 +107,6 @@ __webpack_require__.r(__webpack_exports__);
       block: cookieBlock = false
     } = {}
   } = wecodeartSupportModulesCookies || {};
-  const body = Selector.findOne('body');
-  const cookiesNote = Selector.findOne('#wp-cookies-offcanvas');
   const cookiesForm = Selector.findOne('form[name="wp-cookies"]');
   const necessaryArray = necessary.split(',').map(c => c.trim());
   const necessaryPrefixArray = necessaryPrefix.split(',').map(c => c.trim());
@@ -155,23 +194,6 @@ __webpack_require__.r(__webpack_exports__);
     }
   };
 
-  // Offcanvas events
-  Events.on(cookiesNote, 'hide.wp.offcanvas', function ({
-    relatedTarget = {}
-  }) {
-    const {
-      value
-    } = relatedTarget?.dataset || {};
-    if (['false', 'true'].includes(value)) {
-      body.classList.add(classes?.set);
-      body.classList[value === 'true' ? 'add' : 'remove'](classes?.allow);
-      Cookies.setChoices(value);
-      if (toast.enable) {
-        wecodeartCookieToast(value);
-      }
-    }
-  });
-
   // Load events
   Events.on(document, 'DOMContentLoaded', () => {
     const cookie = Cookies.get('wp-cookies-status');
@@ -219,6 +241,8 @@ __webpack_require__.r(__webpack_exports__);
    */
   wecodeart.Cookies = Cookies;
 }).apply(undefined, [window.wecodeart]));
+})();
+
 /******/ })()
 ;
 //# sourceMappingURL=front.js.map
