@@ -6,6 +6,8 @@
  * @version 1.0.0
  * --------------------------------------------------------------------------
  */
+import './../scss/index.scss';
+
 export default (function (wecodeart) {
     const {
         Events,
@@ -25,8 +27,6 @@ export default (function (wecodeart) {
         } = {}
     } = wecodeartSupportModulesCookies || {};
 
-    const body = Selector.findOne('body');
-    const cookiesNote = Selector.findOne('#wp-cookies-offcanvas');
     const cookiesForm = Selector.findOne('form[name="wp-cookies"]');
 
     const necessaryArray = necessary.split(',').map(c => c.trim());
@@ -114,21 +114,6 @@ export default (function (wecodeart) {
             }
         }
     };
-
-    // Offcanvas events
-    Events.on(cookiesNote, 'hide.wp.offcanvas', function ({ relatedTarget = {} }) {
-        const { value } = relatedTarget?.dataset || {};
-        if (['false', 'true'].includes(value)) {
-            body.classList.add(classes?.set);
-            body.classList[value === 'true' ? 'add' : 'remove'](classes?.allow);
-
-            Cookies.setChoices(value);
-            
-            if(toast.enable) {
-                wecodeartCookieToast(value);
-            }
-        }
-    });
 
     // Load events
     Events.on(document, 'DOMContentLoaded', () => {

@@ -1,0 +1,76 @@
+#wp-cookies-toggle svg {
+    width: initial;
+    height: initial;
+}
+
+.wp-modal.wp-modal--cookies {
+    form {
+        max-height: 350px;
+        border: 1px solid var(--wp--preset--color--accent);
+        overflow: auto;
+    }
+
+    .wp-cookies-table {
+        border-style: hidden;
+
+        &__item-name {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            box-shadow: 0 1px 0 0 var(--wp--preset--color--accent), 0 5px 10px 0 rgb(0 0 0 / 5%);
+        }
+
+        .has-floating {
+            text-decoration: none;
+            outline: none;
+        }
+
+        .form-check {
+            min-height: 1rem;
+            margin: 0.25rem 0 0;
+        }
+    }
+
+    .wp-element-button {
+        display: block;
+        width: 100%;
+    }
+
+    .wp-floating--tooltip {
+        font-size: .65rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .wp-modal.wp-modal--cookies {
+        .wp-block-buttons {
+            --wp--style--block-gap: .5rem;
+            width: 100%;
+        }
+
+        .wp-block-button {
+            display: block;
+            width: calc(50% - var(--wp--style--block-gap) / 2);
+
+            &:not(:last-child) {
+                --wp--preset--font-size--small: .65rem;
+            }
+
+            &:last-child {
+                width: 100%;
+            }
+        }
+
+        .wp-element-button {
+            padding-top: .5rem;
+            padding-bottom: .5rem;
+        }
+    }
+}

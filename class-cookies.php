@@ -9,7 +9,7 @@
  * @subpackage 	Support\Modules\Cookies
  * @copyright   Copyright (c) 2024, WeCodeArt Framework
  * @since 		6.5.2
- * @version		6.5.5
+ * @version		6.5.7
  */
 
 namespace WeCodeArt\Support\Modules;
@@ -173,7 +173,8 @@ final class Cookies implements Integration {
 		}
 
 		\wp_add_inline_script( $this->make_handle(), <<<JS
-			const handleCookiesModal = () => {
+			// Modal
+			(function() {
 				const cookiesModal = Selector.findOne('#wp-cookies-modal');
 				
 				Events.on(cookiesModal, 'hide.wp.modal', function ({ relatedTarget = {} }) {
@@ -182,24 +183,23 @@ final class Cookies implements Integration {
 					if( ['false', 'true', 'save'].includes(value) ) {
 						const { Cookies } = wecodeart;
 
-						Selector.findOne('body').classList[value === 'false' ? 'remove' : 'add'](classes?.allow);
+						Selector.findOne('body').classList[value === 'false' ? 'remove' : 'add'](cookiesClasses?.allow);
 						
 						Cookies.setChoices(value);
 						
-						if(toast.enable) {
+						if(cookiesToast?.enable) {
 							wecodeartCookieToast(value);
 						}
 					}
 				});
-			}
-			handleCookiesModal();
+			})();
 		JS, 'after' );
 
 		ob_start();
 		?>
 		<form class="position-relative" name="wp-cookies">
 			<table class="wp-cookies-table is-style-stripes table-bordered table-hover">
-				<thead class="has-accent-background-color" style="box-shadow: 0 1px 0 0 var(--wp--preset--color--accent), 0 5px 10px 0 rgb(0 0 0 / 5%);">
+				<thead class="has-accent-background-color">
 					<tr>
 						<th><?php esc_html_e( 'Cookie', 'wecodeart' ); ?></th>
 						<th><?php esc_html_e( 'Duration', 'wecodeart' ); ?></th>
@@ -277,7 +277,8 @@ final class Cookies implements Integration {
 			case 'filters':
 				\wecodeart( 'styles' )->Utilities->load( [ 'my-3' ] );
 				\wp_add_inline_script( $this->make_handle(), <<<JS
-					const handleCookiesFilters = () => {
+					// Cookies filters
+					(function() {
 						const cookiesModal = Selector.findOne('#wp-cookies-modal');
 						const searchInputFld = Selector.findOne('input[name="wp-cookies-search"]', cookiesModal);
 						const categoryChange = Selector.findOne('select[name="wp-cookies-categories"]', cookiesModal);
@@ -303,8 +304,7 @@ final class Cookies implements Integration {
 							hideAllCookies();
 							allCookiesRows.filter(el=> handleUserInpt(el, searchInputFld.value ,value)).map(el => el.removeAttribute('style'));
 						});
-					}
-					handleCookiesFilters();
+					})();
 				JS, 'after' );
 		?>
 		<div class="grid my-3" style="--wp--columns: 2">
@@ -333,7 +333,7 @@ final class Cookies implements Integration {
 		<?php
 			break;
 			default:
-				\wecodeart( 'styles' )->Utilities->load( [ 'justify-content-end' ] );
+				\wecodeart( 'styles' )->Utilities->load( [ 'justify-content-between' ] );
 
 				$attributes = [
 					'class' 		=> 'wp-element-button has-small-font-size has-accent-background-color has-dark-color',
@@ -341,7 +341,7 @@ final class Cookies implements Integration {
 					'type'			=> 'button',
 				];
 		?>
-		<div class="wp-block-buttons justify-content-end">
+		<div class="wp-block-buttons justify-content-between">
 			<div class="wp-block-button"><?php
 				
 				wecodeart_input( 'button', [
@@ -524,104 +524,94 @@ final class Cookies implements Integration {
 	 * @return void
 	 */
 	public function front_assets(): void {
-		// Toggler CSS.
-		$l_or_r = get_prop( $this->config, [ 'toggler', 'position' ] );
-		
-		\WP_Style_Engine::store_css_rule( self::CONTEXT, '#wp-cookies-toggle', [ 
-			'position'	=> 'fixed',
-			'z-index'	=> 5,
-			"${l_or_r}"	=> get_prop( $this->config, [ 'toggler', 'style', 'left' ] ) . 'px',
-			'bottom'	=> get_prop( $this->config, [ 'toggler', 'style', 'bottom' ] ) . 'px',
-			'padding'	=> get_prop( $this->config, [ 'toggler', 'style', 'padding' ] ) . 'px',
-			'width'		=> get_prop( $this->config, [ 'toggler', 'style', 'width' ] ) . 'px',
-			'height'	=> get_prop( $this->config, [ 'toggler', 'style', 'height' ] ) . 'px',
-			'color'		=> get_prop( $this->config, [ 'toggler', 'style', 'color' ] ),
-			'border-style'		=> get_prop( $this->config, [ 'toggler', 'style', 'border', 'style' ], '' ),
-			'border-width'		=> get_prop( $this->config, [ 'toggler', 'style', 'border', 'width' ], '' ),
-			'border-color'		=> get_prop( $this->config, [ 'toggler', 'style', 'border', 'color' ], '' ),
-			'border-radius'		=> get_prop( $this->config, [ 'toggler', 'style', 'borderRadius' ], 0 ) . 'px',
-			'background-color'	=> get_prop( $this->config, [ 'toggler', 'style', 'backgroundColor' ], '' ),
-		] );
+		$dynamic_css = '';
 
-		\WP_Style_Engine::store_css_rule( self::CONTEXT, '#wp-cookies-toggle svg', [
-			'height' 	=> 'initial',
-			'width' 	=> 'initial',
-		] );
+		// Toggler CSS.
+		$position 			= get_prop( $this->config, [ 'toggler', 'position'	] );
+		$offfset			= get_prop( $this->config, [ 'toggler', 'style', 'left' ] );
+		$offfset 			= $position === 'right' ? "calc({$offfset}px + var(--wp--scrollbar-width, 0px))" : $offfset;
+		$bottom 			= get_prop( $this->config, [ 'toggler', 'style', 'bottom' 	] );
+		$padding 			= get_prop( $this->config, [ 'toggler', 'style', 'padding' 	] );
+		$width 				= get_prop( $this->config, [ 'toggler', 'style', 'width' 	] );
+		$height 			= get_prop( $this->config, [ 'toggler', 'style', 'height' 	] );
+		$color 				= get_prop( $this->config, [ 'toggler', 'style', 'color' 	] );
+		$border_style 		= get_prop( $this->config, [ 'toggler', 'style', 'border', 'style' 	], '' );
+		$border_width 		= get_prop( $this->config, [ 'toggler', 'style', 'border', 'width' 	], '' );
+		$border_color 		= get_prop( $this->config, [ 'toggler', 'style', 'border', 'color' 	], '' );
+		$border_radius 		= get_prop( $this->config, [ 'toggler', 'style', 'borderRadius' 	], 0 );
+		$background_color 	= get_prop( $this->config, [ 'toggler', 'style', 'backgroundColor' 	], '' );
+
+		$dynamic_css .= "
+			#wp-cookies-toggle {
+				position: fixed;
+				z-index: 5;
+				{$position}: {$offfset};
+				bottom: {$bottom}px;
+				padding: {$padding}px;
+				width: {$width}px;
+				height: {$height}px;
+				color: {$color};
+				border-style: {$border_style};
+				border-width: {$border_width};
+				border-color: {$border_color};
+				border-radius: {$border_radius}px;
+				background-color: {$background_color};
+			}
+		";
 
 		// OffCanvas CSS
-		$background = get_prop( $this->config, [ 'offcanvas', 'style', 'backgroundColor' ], '' );
+		$offcanvas_color	= get_prop( $this->config, [ 'offcanvas', 'style', 'color' ], '' );
+		$offcanvas_bg_color	= get_prop( $this->config, [ 'offcanvas', 'style', 'backgroundColor' ], '' );
+		$offcanvas_br_color	= $offcanvas_bg_color ? wecodeart('styles')::hex_brightness( $offcanvas_bg_color, -25 ) : '';
 
-		\WP_Style_Engine::store_css_rule( self::CONTEXT, '.wp-offcanvas.wp-offcanvas--cookies', [
-			'--wp--offcanvas-bg'			=> $background,
-			'--wp--offcanvas-border-color'	=> $background ? wecodeart( 'styles' )::hex_brightness( $background, -25 ) : '',
-			'--wp--offcanvas-color'			=> get_prop( $this->config, [ 'offcanvas', 'style', 'color' ], '' ),
-			'height'						=> 'auto',
-		] );
+		$dynamic_css .= "
+			.wp-offcanvas.wp-offcanvas--cookies {
+				--wp--offcanvas-bg: {$offcanvas_bg_color};
+				--wp--offcanvas-border-color: {$offcanvas_br_color};
+				--wp--offcanvas-color: {$offcanvas_color};
+				height: auto;
+			}
+		";
 
-		if( get_prop( $this->config, [ 'offcanvas', 'title' ] ) || get_prop( $this->config, [ 'offcanvas', 'close' ] ) === true ) {
-			\WP_Style_Engine::store_css_rule( self::CONTEXT, '.wp-offcanvas.wp-offcanvas--cookies .wp-offcanvas__body', [
-				'padding-top' 	=> '0',
-			] );
+		if ( get_prop( $this->config, [ 'offcanvas', 'title' ] ) || get_prop( $this->config, [ 'offcanvas', 'close'] ) === true ) {
+			$dynamic_css .= <<<CSS
+				.wp-offcanvas.wp-offcanvas--cookies .wp-offcanvas__body {
+					padding-top: 0;
+				}
+			CSS;
 		}
 		
 		// Modal CSS
-		$background = get_prop( $this->config, [ 'modal', 'style', 'backgroundColor' ], '' );
-		$darker_bgc = $background ? wecodeart( 'styles' )::hex_brightness( $background, -25 ) : '';
-		
-		\WP_Style_Engine::store_css_rule( self::CONTEXT, '.wp-modal.wp-modal--cookies .wp-modal__dialog', [
-			'--wp--modal-bg' 					=> $background,
-			'--wp--modal-color' 				=> get_prop( $this->config, [ 'modal', 'style', 'color' ], '' ),
-			'--wp--modal-border-color'			=> $darker_bgc,
-			'--wp--modal-header-bg' 			=> $darker_bgc,
-			'--wp--modal-header-border-color'	=> $darker_bgc,
-			'--wp--modal-footer-border-color'	=> $darker_bgc,
-			'--wp--preset--color--accent'		=> $darker_bgc,
-			'--wp--input--background-color'		=> $darker_bgc,
-			'--wp--input--border'				=> $darker_bgc ? '1px solid ' . $darker_bgc : '',
-		] );
+		$modal_color 		= get_prop( $this->config, [ 'modal', 'style', 'color' ], '' );
+		$modal_background 	= get_prop( $this->config, [ 'modal', 'style', 'backgroundColor' ], '' );
+		$modal_darker_bg 	= $modal_background ? wecodeart( 'styles' )::hex_brightness( $modal_background, -25 ) : '';
+		$modal_darker_br 	= $modal_background ? "1px solid {$modal_darker_bg}" : '';
 
-		\WP_Style_Engine::store_css_rule( self::CONTEXT, '.wp-modal.wp-modal--cookies form', [
-			'max-height'	=> '350px',
-			'border'		=> '1px solid var(--wp--preset--color--accent)',
-			'overflow'		=> 'auto',
-		] );
+		$dynamic_css .= "
+			.wp-modal.wp-modal--cookies .wp-modal__dialog {
+				--wp--modal-bg: {$modal_background};
+				--wp--modal-color: {$modal_color};
+				--wp--modal-border-color: {$modal_darker_bg};
+				--wp--modal-header-bg: {$modal_darker_bg};
+				--wp--modal-header-border-color: {$modal_darker_bg};
+				--wp--modal-footer-border-color: {$modal_darker_bg};
+				--wp--preset--color--accent: {$modal_darker_bg};
+				--wp--input--background-color: {$modal_darker_bg};
+				--wp--input--border: {$modal_darker_br};
+			}
+		";
 
-		\WP_Style_Engine::store_css_rule( self::CONTEXT, '.wp-modal.wp-modal--cookies .wp-cookies-table', [
-			'border-style'	=> 'hidden',
-		] );
-		
-		\WP_Style_Engine::store_css_rule( self::CONTEXT, '.wp-modal.wp-modal--cookies .wp-cookies-table thead', [
-			'position'		=> 'sticky',
-			'top'			=> '0',
-			'z-index'		=> '2',
-			'box-shadow'	=> '0 1px 0 0 var(--wp--preset--color--accent), 0 5px 10px 0 rgb(0 0 0 / 5%)', // Added inline
-		] );
-
-		\WP_Style_Engine::store_css_rule( self::CONTEXT, '.wp-modal.wp-modal--cookies .wp-cookies-table__item-name', [
-			'max-width' 	=> '200px',
-			'overflow' 		=> 'hidden',
-			'text-overflow'	=> 'ellipsis',
-			'white-space' 	=> 'nowrap', 
-		] );
-
-		\WP_Style_Engine::store_css_rule( self::CONTEXT, '.wp-modal.wp-modal--cookies .wp-cookies-table .form-check', [
-			'min-height' 	=> '1rem',
-			'margin' 		=> '0.25rem 0 0',
-		] );
-
-		\WP_Style_Engine::store_css_rule( self::CONTEXT, '.wp-modal.wp-modal--cookies .has-floating', [
-			'text-decoration' 	=> 'none',
-		] );
-
-		\WP_Style_Engine::store_css_rule( self::CONTEXT, '.wp-modal.wp-modal--cookies .wp-floating--tooltip', [
-			'font-size' 	=> '.65rem',
-		] );
-
-		// Styles.
 		\wp_style_engine_get_styles( [], [
-			'selector' 	=> '.wp-offcanvas.wp-offcanvas--cookies',
 			'context'	=> self::CONTEXT
 		] );
+
+		\wecodeart( 'assets' )->add_style( 'wp-style-engine-' . self::CONTEXT, [
+			'inline'	=> 'file:' . $this->get_asset( 'css', 'front' ),
+		] );
+
+		foreach( wecodeart( 'styles' )::string_to_array( $dynamic_css ) as $selector => $declarations ) {
+			\WP_Style_Engine::store_css_rule( self::CONTEXT, $selector, $declarations );
+		}
 
 		// Scripts.
 		\wecodeart( 'assets' )->add_script( $this->make_handle(), [
@@ -635,12 +625,15 @@ final class Cookies implements Integration {
 		] );
 
 		\wp_add_inline_script( $this->make_handle(), <<<JS
-			const { plugins: { Toast }, Template, Selector, Events } = wecodeart;
-			const { toast = {}, classes = [] } = wecodeartSupportModulesCookies || {};
+			// Cookies vars
+			const { Selector, Events, Cookies } = wecodeart;
+			const { toast: cookiesToast = {}, classes: cookiesClasses = [] } = wecodeartSupportModulesCookies || {};
 		JS, 'after' );
 
 		if( get_prop( $this->config, [ 'toast', 'enable' ] ) ) {
 			\wp_add_inline_script( $this->make_handle(), <<<JS
+				// Cookies toast
+				const { plugins: { Toast }, Template } = wecodeart;
 				const wecodeartCookieToast = (value = '') => {
 					if(!value) {
 						return;
@@ -650,7 +643,7 @@ final class Cookies implements Integration {
 
 					const template = new Template({
 						content: {
-							'.wp-toast__header-text': isConfirmed ? toast?.confirm : toast?.reject,
+							'.wp-toast__header-text': isConfirmed ? cookiesToast?.confirm : cookiesToast?.reject,
 							'.wp-toast__body': null,
 						},
 						extraClass: isConfirmed ? 'has-success-background-color' : 'has-danger-background-color',
@@ -659,10 +652,32 @@ final class Cookies implements Integration {
 					
 					Selector.findOne('.wp-site-toasts')?.appendChild(template);
 	
-					return new Toast(template, { delay: parseInt(toast?.delay) }).show();
+					return new Toast(template, { delay: parseInt(cookiesToast?.delay) }).show();
 				}
 			JS, 'after' );
 		}
+
+		\wp_add_inline_script( $this->make_handle(), <<<JS
+			// Offcanvas
+			(function() {
+				const body = Selector.findOne('body');
+				const cookiesNote = Selector.findOne('#wp-cookies-offcanvas');
+
+				Events.on(cookiesNote, 'hide.wp.offcanvas', function ({ relatedTarget = {} }) {
+					const { value } = relatedTarget?.dataset || {};
+					if (['false', 'true'].includes(value)) {
+						body.classList.add(cookiesClasses?.set);
+						body.classList[value === 'true' ? 'add' : 'remove'](cookiesClasses?.allow);
+
+						Cookies.setChoices(value);
+
+						if(cookiesToast?.enable) {
+							wecodeartCookieToast(value);
+						}
+					}
+				});
+			})();
+		JS, 'after' );
 	}
 
 	/**
