@@ -598,6 +598,8 @@ final class Cookies implements Integration {
 				--wp--preset--color--accent: {$modal_darker_bg};
 				--wp--input--background-color: {$modal_darker_bg};
 				--wp--input--border: {$modal_darker_br};
+				--wp--input--border-color-focus: {$modal_color};
+				--wp--preset--color--primary: {$modal_color};
 			}
 		";
 
