@@ -815,7 +815,7 @@ final class Cookies implements Integration {
 				[
 					'taxonomy' => 'wp_theme',
 					'field'    => 'name',
-					'terms'    => [ self::SLUGS['wecodeart'], get_stylesheet() ],
+					'terms'    => [ get_stylesheet() ],
 				]
 			],
 		];
@@ -824,9 +824,9 @@ final class Cookies implements Integration {
 		$saved_templates 	= $check_query->posts;
 
 		if( count( $saved_templates ) ) {
-			$template = '<!-- wp:template-part {"slug":"' . $slug . '","tagName":"div","theme":"' . wecodeart( 'name' ) . '"} /-->';
+			$template = '<!-- wp:template-part {"slug":"' . $slug . '","tagName":"div","theme":"' . get_stylesheet() . '"} /-->';
 		} else {
-			$template = '<!-- wp:pattern {"slug":"wecodeart/' . $slug . '"} /-->';
+			$template = '<!-- wp:pattern {"slug":"' .  get_stylesheet() . '/' . $slug . '"} /-->';
 			$post_id_ = wp_insert_post( [
 				'post_content' 	=> $template,
 				'post_type'		=> 'wp_template_part',
@@ -834,7 +834,7 @@ final class Cookies implements Integration {
 				'post_name'		=> $slug,
 				'post_status'	=> 'publish',
 			] );
-			wp_set_object_terms( $post_id_, [ self::SLUGS['wecodeart'], get_stylesheet() ], 'wp_theme' );
+			wp_set_object_terms( $post_id_, [ get_stylesheet() ], 'wp_theme' );
 			wp_set_object_terms( $post_id_, [ self::CONTEXT ], 'wp_template_part_area' );
 		}
 
