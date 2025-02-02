@@ -42,7 +42,6 @@ const TogglerOpts = ({ formData, setFormData, setStyle, colors }) => {
                             }
                         })}
                         help={__('Relative to the browser window.', 'wecodeart')}
-                        __nextHasNoMarginBottom
                     />
                 </p>
                 <p>

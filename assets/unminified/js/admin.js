@@ -402,8 +402,7 @@ const OffcanvasOpts = ({
               }
             }
           }),
-          help: __('Relative to the browser window.', 'wecodeart'),
-          __nextHasNoMarginBottom: true
+          help: __('Relative to the browser window.', 'wecodeart')
         })
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("p", {
         children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(TextControl, {
@@ -443,8 +442,7 @@ const OffcanvasOpts = ({
               }
             }
           }),
-          help: formData?.offcanvas?.backdrop !== 'false' && sprintf(__('Clicking backdrop will %s offcanvas.', 'wecodeart'), formData?.offcanvas?.backdrop === 'static' ? __('not close', 'wecodeart') : __('close', 'wecodeart')),
-          __nextHasNoMarginBottom: true
+          help: formData?.offcanvas?.backdrop !== 'false' && sprintf(__('Clicking backdrop will %s offcanvas.', 'wecodeart'), formData?.offcanvas?.backdrop === 'static' ? __('not close', 'wecodeart') : __('close', 'wecodeart'))
         })
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("p", {
         children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(ToggleControl, {
@@ -628,8 +626,7 @@ const TogglerOpts = ({
               }
             }
           }),
-          help: __('Relative to the browser window.', 'wecodeart'),
-          __nextHasNoMarginBottom: true
+          help: __('Relative to the browser window.', 'wecodeart')
         })
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("p", {
         children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(HStack, {

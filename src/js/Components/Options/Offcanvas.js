@@ -41,7 +41,6 @@ const OffcanvasOpts = ({ formData, setFormData, setStyle, colors }) => {
                             }
                         })}
                         help={__('Relative to the browser window.', 'wecodeart')}
-                        __nextHasNoMarginBottom
                     />
                 </p>
                 <p>
@@ -80,7 +79,6 @@ const OffcanvasOpts = ({ formData, setFormData, setStyle, colors }) => {
                             __('Clicking backdrop will %s offcanvas.', 'wecodeart'),
                             formData?.offcanvas?.backdrop === 'static' ? __('not close', 'wecodeart') : __('close', 'wecodeart')
                         )}
-                        __nextHasNoMarginBottom
                     />
                 </p>
                 <p>
