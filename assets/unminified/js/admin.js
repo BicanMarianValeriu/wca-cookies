@@ -73,8 +73,7 @@ const ModalOpts = ({
               }
             }
           }),
-          help: __('Relative to the browser window.', 'wecodeart'),
-          __nextHasNoMarginBottom: true
+          help: __('Relative to the browser window.', 'wecodeart')
         })
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("p", {
         children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(TextControl, {
@@ -114,8 +113,7 @@ const ModalOpts = ({
               }
             }
           }),
-          help: formData?.modal?.backdrop !== 'false' && sprintf(__('Clicking backdrop will %s modal.', 'wecodeart'), formData?.modal?.backdrop === 'static' ? __('not close', 'wecodeart') : __('close', 'wecodeart')),
-          __nextHasNoMarginBottom: true
+          help: formData?.modal?.backdrop !== 'false' && sprintf(__('Clicking backdrop will %s modal.', 'wecodeart'), formData?.modal?.backdrop === 'static' ? __('not close', 'wecodeart') : __('close', 'wecodeart'))
         })
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("p", {
         children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(ToggleControl, {

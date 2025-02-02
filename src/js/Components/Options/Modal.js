@@ -42,7 +42,6 @@ const ModalOpts = ({ formData, setFormData, setStyle, colors }) => {
                             }
                         })}
                         help={__('Relative to the browser window.', 'wecodeart')}
-                        __nextHasNoMarginBottom
                     />
                 </p>
                 <p>
@@ -81,7 +80,6 @@ const ModalOpts = ({ formData, setFormData, setStyle, colors }) => {
                             __('Clicking backdrop will %s modal.', 'wecodeart'),
                             formData?.modal?.backdrop === 'static' ? __('not close', 'wecodeart') : __('close', 'wecodeart')
                         )}
-                        __nextHasNoMarginBottom
                     />
                 </p>
                 <p>
