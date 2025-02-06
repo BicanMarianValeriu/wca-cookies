@@ -40,8 +40,11 @@ export default (function (wecodeart) {
         },
         set(name, value, expire = expireTime, path = cookiePath, domain) {
             const { protocol } = window.location;
-            const domainString = domain ? `;domain=${domain}` : '';
             const isSecure = protocol === 'https:' ? ';secure' : '';
+            const domainParts = hostname.split('.');
+            const isSubdomain = domainParts.length > 2;
+            const mainDomain = isSubdomain ? domainParts.slice(-2).join('.') : hostname;
+            const domainString = domain ? `;domain=${domain}` : (isSubdomain ? `;domain=.${mainDomain}` : '');
 
             const expireDate = new Date();
             expireDate.setTime(expireDate.getTime() + (expire * 24 * 60 * 60 * 1000));
@@ -60,9 +63,15 @@ export default (function (wecodeart) {
             }
 
             const { hostname } = window.location;
-            Cookies.set(name, '', -1);
+            const domainParts = hostname.split('.');
+            const isSubdomain = domainParts.length > 2;
+            const mainDomain = isSubdomain ? domainParts.slice(-2).join('.') : hostname;
+
+            // Remove from current domain and possible main domain
             Cookies.set(name, '', -1, '/');
-            Cookies.set(name, '', -1, '/', hostname.startsWith('www') ? hostname.substring(3) : hostname);
+            if (isSubdomain) {
+                Cookies.set(name, '', -1, '/', `.${mainDomain}`);
+            }
         },
         removeMultiple(cookies = []) {
             cookies.forEach(Cookies.remove);
