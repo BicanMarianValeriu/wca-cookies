@@ -39,19 +39,20 @@ export default (function (wecodeart) {
             return cookies[name] ? decodeURIComponent(cookies[name]) : '';
         },
         set(name, value, expire = expireTime, path = cookiePath, domain) {
-            const { protocol } = window.location;
+            const { protocol, hostname } = window.location;
             const isSecure = protocol === 'https:' ? ';secure' : '';
             const domainParts = hostname.split('.');
             const isSubdomain = domainParts.length > 2;
             const mainDomain = isSubdomain ? domainParts.slice(-2).join('.') : hostname;
-            const domainString = domain ? `;domain=${domain}` : (isSubdomain ? `;domain=.${mainDomain}` : '');
+            const domainString = domain ? domain : (isSubdomain ? `.${mainDomain}` : '');
 
             const expireDate = new Date();
             expireDate.setTime(expireDate.getTime() + (expire * 24 * 60 * 60 * 1000));
-            const expires = `;expires=${expireDate.toUTCString()}`;
 
-            const cookieString = `${name}=${value}${expires};path=${path}${domainString}${isSecure}`;
-            document.cookie = cookieString;
+            document.cookie = `${name}=${value};expires=${expireDate.toUTCString()};path=${path}${isSecure}`; 
+            if (isSubdomain) {
+                document.cookie = `${name}=${value};expires=${expireDate.toUTCString()};path=${path};domain=${domainString}${isSecure}`;
+            }
         },
         remove(name) {
             if (Cookies.isNecessary(name)) {
@@ -130,6 +131,12 @@ export default (function (wecodeart) {
 
         // Respect user choices
         if (cookie) {
+            // Handle classes
+            document.body.classList.add(classes?.set);
+            if(Boolean(cookie)) {
+                document.body.classList.add(classes?.allow);
+            }
+
             // Handle switches based on user preference.
             let blockedCookies = Cookies.get('wp-cookies-blocked') ?? [];
             if (blockedCookies) {
@@ -143,6 +150,7 @@ export default (function (wecodeart) {
                 choices.map(field => field.checked = blockedCookies.includes(field.value) ? false : true);
             }
         } else {
+            document.body.classList.remove(classes?.set);
             // Remove cookies if no preference.
             if (cookieBlock) {
                 const cookies = document.cookie.split(';').map(cookie => cookie.split('=')[0].trim());
