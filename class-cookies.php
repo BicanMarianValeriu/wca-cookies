@@ -41,7 +41,6 @@ final class Cookies implements Integration {
 
 	const CLASSES 	= [
 		'set' 		=> 'wp-cookies-set',
-		'status' 	=> 'wp-cookies-status',
 		'allow' 	=> 'wp-cookies-allow',
 	];
 
