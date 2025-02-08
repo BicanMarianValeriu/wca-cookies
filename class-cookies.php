@@ -9,7 +9,7 @@
  * @subpackage 	Support\Modules\Cookies
  * @copyright   Copyright (c) 2024, WeCodeArt Framework
  * @since 		6.5.2
- * @version		6.5.7
+ * @version		6.6.1
  */
 
 namespace WeCodeArt\Support\Modules;

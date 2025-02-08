@@ -9,7 +9,7 @@
  * @subpackage 	Support\Modules\Cookies
  * @copyright   Copyright (c) 2024, WeCodeArt Framework
  * @since 		6.5.2
- * @version		6.5.2
+ * @version		6.6.1
  */
 
 namespace WeCodeArt\Support\Modules\Cookies;
@@ -41,19 +41,21 @@ trait Helpers {
         // Remove cookies from $_COOKIE superglobal
         foreach ( $_COOKIE as $name => $value ) {
             if ( ! $this->is_necessary_cookie( $name, $a, $b ) ) {
-                if ( ! $blocked || in_array( $name, $blocked_cookies ) ) {
+                if ( is_null( $blocked ) || in_array( $name, $blocked_cookies ) ) {
                     $this->set_cookie( $name, '', ( time() - 8640000 ) );
-                    unset( $_COOKIE[ $name ] );
                 }
             }
         }
 
 		// Remove headers that set non-strictly necessary cookies
         foreach ( headers_list() as $h ) {
-            if ( preg_match('/Set-Cookie: (.+?)=/si', $h, $m ) && ! $this->is_necessary_cookie( $m[1], $a, $b ) ) {
-                if ( ! $blocked || in_array( $m[1], $blocked_cookies ) ) {
-                    header_remove( 'Set-Cookie' );
-                }
+            if ( preg_match( '/^Set-Cookie:\s*([^=]+)=/i', $h, $m ) ) {
+				$name = trim( $m[1] );
+				if( ! $this->is_necessary_cookie( $name, $a, $b ) ) {
+					if ( is_null( $blocked ) || in_array( $name, $blocked_cookies ) ) {
+						header( "Set-Cookie: {$name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; secure; HttpOnly" );
+					}
+				}
             }
         }
 	}
@@ -109,7 +111,7 @@ trait Helpers {
 	 */
 	private function set_cookie( $name, $value, $expire = 0, $secure = false ): void {
 		if ( ! headers_sent() ) {
-			setcookie( $name, $value, $expire, COOKIEPATH, COOKIE_DOMAIN, $secure );
+			setcookie( $name, $value, $expire, COOKIEPATH, COOKIE_DOMAIN, $secure, true );
 		} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			headers_sent( $file, $line );
 			trigger_error( "{$name} cookie cannot be set - headers already sent by {$file} on line {$line}", E_USER_NOTICE ); // @codingStandardsIgnoreLine
