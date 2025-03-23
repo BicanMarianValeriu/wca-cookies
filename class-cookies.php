@@ -528,7 +528,7 @@ final class Cookies implements Integration {
 		// Toggler CSS.
 		$position 			= get_prop( $this->config, [ 'toggler', 'position'	] );
 		$offfset			= get_prop( $this->config, [ 'toggler', 'style', 'left' ] );
-		$offfset 			= $position === 'right' ? "calc({$offfset}px + var(--wp--scrollbar-width, 0px))" : $offfset;
+		$offfset 			= $position === 'right' ? "calc({$offfset}px + var(--wp--scrollbar-width, 0px))" : "{$offfset}px";
 		$bottom 			= get_prop( $this->config, [ 'toggler', 'style', 'bottom' 	] );
 		$padding 			= get_prop( $this->config, [ 'toggler', 'style', 'padding' 	] );
 		$width 				= get_prop( $this->config, [ 'toggler', 'style', 'width' 	] );
