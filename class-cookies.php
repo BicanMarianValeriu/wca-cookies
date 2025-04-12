@@ -9,7 +9,7 @@
  * @subpackage 	Support\Modules\Cookies
  * @copyright   Copyright (c) 2024, WeCodeArt Framework
  * @since 		6.5.2
- * @version		6.6.1
+ * @version		6.6.4
  */
 
 namespace WeCodeArt\Support\Modules;
@@ -29,7 +29,8 @@ final class Cookies implements Integration {
     use Singleton;
 	use No_Conditionals;
 	use Cookies\Helpers;
-
+	
+	const VERSION 	= '1.0.9';
 	const CACHE 	= 'wecodeart/support/cookies';
 	const CONTEXT 	= 'wca-cookies';
 
@@ -423,7 +424,7 @@ final class Cookies implements Integration {
 			$backdrop	= get_prop( $this->config, [ 'modal', 'backdrop' ] );
 
 			$p->next_tag( 'a' );
-			$p->set_attribute( 'aria-controls', '#' . $settings . '-modal' );
+			$p->set_attribute( 'aria-controls', $settings . '-modal' );
 			$p->set_attribute( 'data-wp-interactive', 'wecodeart/modal' );
 			$p->set_attribute( 'data-wp-context', toJSON( [
 				'keyboard'	=> filter_var( get_prop( $this->config, [ 'modal', 'keyboard' ] ), FILTER_VALIDATE_BOOLEAN ),
@@ -528,7 +529,7 @@ final class Cookies implements Integration {
 		// Toggler CSS.
 		$position 			= get_prop( $this->config, [ 'toggler', 'position'	] );
 		$offfset			= get_prop( $this->config, [ 'toggler', 'style', 'left' ] );
-		$offfset 			= $position === 'right' ? "calc({$offfset}px + var(--wp--scrollbar-width, 0px))" : $offfset;
+		$offfset 			= $position === 'right' ? "calc({$offfset}px + var(--wp--scrollbar-width, 0px))" : "{$offfset}px";
 		$bottom 			= get_prop( $this->config, [ 'toggler', 'style', 'bottom' 	] );
 		$padding 			= get_prop( $this->config, [ 'toggler', 'style', 'padding' 	] );
 		$width 				= get_prop( $this->config, [ 'toggler', 'style', 'width' 	] );
