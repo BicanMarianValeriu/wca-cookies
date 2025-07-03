@@ -45,7 +45,8 @@ class Manager implements Configuration {
         'name',
         'category',
         'description',
-        'duration'
+        'duration',
+        'blockedPatterns'
     ];
 
     /**

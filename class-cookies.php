@@ -622,7 +622,8 @@ final class Cookies implements Integration {
 				'classes' 		=> self::CLASSES,
 				'cookiePath' 	=> COOKIEPATH,
 				'cookies'		=> get_prop( $this->config, [ 'cookies' ], [] ),
-				'toast'			=> get_prop( $this->config, [ 'toast' ], [] )
+				'toast'			=> get_prop( $this->config, [ 'toast' ], [] ),
+				'blockedPatterns' => $this->get_blocked_patterns()
 			],
 		] );
 
