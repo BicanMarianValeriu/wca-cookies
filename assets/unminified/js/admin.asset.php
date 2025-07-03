@@ -1,1 +1,1 @@
-<?php return array('dependencies' => array('react-jsx-runtime', 'wp-polyfill'), 'version' => 'b4d598b9a4851b0fcec9');
+<?php return array('dependencies' => array('react-jsx-runtime', 'wp-polyfill'), 'version' => 'e01c5671831e7df925cf');

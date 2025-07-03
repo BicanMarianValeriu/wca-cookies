@@ -105,7 +105,8 @@ __webpack_require__.r(__webpack_exports__);
       necessaryPrefix = '',
       expire: expireTime = 30,
       block: cookieBlock = false
-    } = {}
+    } = {},
+    blockedPatterns = []
   } = wecodeartSupportModulesCookies || {};
   const cookiesForm = Selector.findOne('form[name="wp-cookies"]');
   const necessaryArray = necessary.split(',').map(c => c.trim());
@@ -155,11 +156,24 @@ __webpack_require__.r(__webpack_exports__);
         Cookies.set(name, '', -1, '/', `.${mainDomain}`);
       }
     },
+    removeByPattern() {
+      const allCookies = document.cookie.split(';').map(cookie => cookie.split('=')[0].trim());
+      const cookiesToRemove = allCookies.filter(cookieName => {
+        return !Cookies.isNecessary(cookieName) && Cookies.matchesBlockedPattern(cookieName, blockedPatterns);
+      });
+      Cookies.removeMultiple(cookiesToRemove);
+    },
     removeMultiple(cookies = []) {
       cookies.forEach(Cookies.remove);
     },
     isNecessary(name) {
       return necessaryArray.includes(name) || necessaryPrefixArray.some(prefix => name.match('^' + prefix + '(|.+?)'));
+    },
+    matchesBlockedPattern(name, blockedPatterns) {
+      return blockedPatterns.some(pattern => {
+        const regexPattern = pattern.replace(/\*/g, '.*');
+        return new RegExp('^' + regexPattern + '$', 'i').test(name);
+      });
     },
     getChoices() {
       let choices = [];
@@ -211,7 +225,6 @@ __webpack_require__.r(__webpack_exports__);
 
     // Respect user choices
     if (cookie) {
-      var _Cookies$get;
       // Handle classes
       document.body.classList.add(classes?.set);
       if (Boolean(cookie)) {
@@ -219,11 +232,14 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       // Handle switches based on user preference.
-      let blockedCookies = (_Cookies$get = Cookies.get('wp-cookies-blocked')) !== null && _Cookies$get !== void 0 ? _Cookies$get : [];
+      let blockedCookies = Cookies.get('wp-cookies-blocked') || [];
       if (blockedCookies) {
         blockedCookies = blockedCookies.split(',').map(c => c.trim());
         Cookies.removeMultiple(blockedCookies);
       }
+
+      // Remove cookies that match blocked patterns
+      Cookies.removeByPattern();
 
       // Handle switches based on block (for cache).
       if (cookiesForm) {
@@ -237,6 +253,9 @@ __webpack_require__.r(__webpack_exports__);
         const cookies = document.cookie.split(';').map(cookie => cookie.split('=')[0].trim());
         Cookies.removeMultiple(cookies);
         Cookies.set('wp-cookies-blocked', cookies.filter(n => !Cookies.isNecessary(n)).toString());
+
+        // Also remove cookies that match blocked patterns
+        Cookies.removeByPattern();
       }
 
       // Adjust choices if form exists (for cache).

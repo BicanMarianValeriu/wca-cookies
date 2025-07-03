@@ -38,10 +38,14 @@ trait Helpers {
             $blocked_cookies = array_unique( array_map( 'trim', explode( ',', sanitize_text_field( $blocked ) ) ) );
         }
 
+        // Get blocked patterns from manager
+        $blocked_patterns = $this->get_blocked_patterns();
+
         // Remove cookies from $_COOKIE superglobal
         foreach ( $_COOKIE as $name => $value ) {
             if ( ! $this->is_necessary_cookie( $name, $a, $b ) ) {
-                if ( is_null( $blocked ) || in_array( $name, $blocked_cookies ) ) {
+                $should_block = is_null( $blocked ) || in_array( $name, $blocked_cookies ) || $this->matches_blocked_pattern( $name, $blocked_patterns );
+                if ( $should_block ) {
                     $this->set_cookie( $name, '', ( time() - 8640000 ) );
                 }
             }
@@ -52,7 +56,8 @@ trait Helpers {
             if ( preg_match( '/^Set-Cookie:\s*([^=]+)=/i', $h, $m ) ) {
 				$name = trim( $m[1] );
 				if( ! $this->is_necessary_cookie( $name, $a, $b ) ) {
-					if ( is_null( $blocked ) || in_array( $name, $blocked_cookies ) ) {
+                    $should_block = is_null( $blocked ) || in_array( $name, $blocked_cookies ) || $this->matches_blocked_pattern( $name, $blocked_patterns );
+					if ( $should_block ) {
 						header( "Set-Cookie: {$name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; secure; HttpOnly" );
 					}
 				}
@@ -96,6 +101,45 @@ trait Helpers {
 			}
 		}
 
+		return false;
+	}
+
+	/**
+	 * Get blocked patterns from manager
+	 *
+	 * @return 	array
+	 */
+	private function get_blocked_patterns(): array {
+		$patterns = [];
+		$all_cookies = $this->manager->all();
+		
+		foreach ( $all_cookies as $cookie_data ) {
+			if ( isset( $cookie_data['blockedPatterns'] ) && ! empty( $cookie_data['blockedPatterns'] ) ) {
+				$cookie_patterns = array_map( 'trim', explode( ',', $cookie_data['blockedPatterns'] ) );
+				$patterns = array_merge( $patterns, $cookie_patterns );
+			}
+		}
+		
+		return array_unique( $patterns );
+	}
+
+	/**
+	 * Check if cookie name matches any blocked pattern
+	 *
+	 * @param 	string	$cookie_name
+	 * @param 	array	$blocked_patterns
+	 *
+	 * @return 	bool
+	 */
+	private function matches_blocked_pattern( string $cookie_name, array $blocked_patterns ): bool {
+		foreach ( $blocked_patterns as $pattern ) {
+			// Convert wildcard pattern to regex
+			$regex_pattern = str_replace( '*', '.*', preg_quote( $pattern, '/' ) );
+			if ( preg_match( '/^' . $regex_pattern . '$/i', $cookie_name ) ) {
+				return true;
+			}
+		}
+		
 		return false;
 	}
 

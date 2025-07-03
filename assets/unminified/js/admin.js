@@ -807,11 +807,12 @@ const ManageCookie = ({
   currentCookie,
   setCookies
 }) => {
-  const [data, setData] = useState(currentCookie !== null && currentCookie !== void 0 ? currentCookie : {
+  const [data, setData] = useState(currentCookie || {
     name: '',
     duration: '',
     category: '',
-    description: ''
+    description: '',
+    blockedPatterns: ''
   });
   const [doingAjax, setDoingAjax] = useState(null);
   const formRef = useRef(null);
@@ -820,7 +821,7 @@ const ManageCookie = ({
     const formData = new FormData(formRef.current);
     if (currentCookie) {
       // Add name for editing cookie (as the input is disabled);
-      formData.set('name', currentCookie?.name);
+      formData.set('name', currentCookie.name);
     }
     const response = await fetch(`${wecodeart.restUrl}/manage_cookies`, {
       method: 'POST',
@@ -834,19 +835,28 @@ const ManageCookie = ({
   };
   const objectHasEmptyValues = obj => Object.keys(obj).filter(key => obj[key] === '').length;
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Modal, {
-    title: currentCookie ? sprintf(__('Edit "%s" cookie', 'wecodeart'), currentCookie?.name) : __('Add cookie', 'wecodeart'),
+    title: currentCookie ? sprintf(__('Edit "%s" cookie', 'wecodeart'), currentCookie.name) : __('Add cookie', 'wecodeart'),
     onRequestClose: closeModal,
     children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("form", {
       ref: formRef,
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(TextControl, {
         label: __('Cookie name', 'wecodeart'),
         name: "name",
-        value: data?.name,
+        value: data.name || '',
         disabled: currentCookie,
         required: true,
         onChange: name => setData({
           ...data,
           name
+        })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(TextareaControl, {
+        label: __('Regex', 'wecodeart'),
+        name: "blockedPatterns",
+        help: __('Comma-separated patterns to block (e.g., _ga_*, _hjSession_*). Use * as wildcard.', 'wecodeart'),
+        value: data.blockedPatterns || '',
+        onChange: blockedPatterns => setData({
+          ...data,
+          blockedPatterns
         })
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(TextControl, {
         label: __('Duration', 'wecodeart'),
@@ -943,6 +953,8 @@ const CookiesTable = ({
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("th", {
             children: __('Category', 'wecodeart')
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("th", {
+            children: __('Regex', 'wecodeart')
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("th", {
             style: {
               width: '1px',
               whiteSpace: 'nowrap'
@@ -956,17 +968,26 @@ const CookiesTable = ({
             name,
             description,
             duration = '-',
-            category
+            category,
+            blockedPatterns
           } = cookies[key];
           return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("tr", {
             children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
-              children: name !== null && name !== void 0 ? name : key
+              children: name || key
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
               children: description
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
               children: duration
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
-              children: categories?.[category] ? categories[category] : '-'
+              children: categories && categories[category] ? categories[category] : '-'
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
+              style: {
+                maxWidth: '120px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              },
+              children: blockedPatterns || '-'
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
               children: name ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(ButtonGroup, {
                 style: {
@@ -1018,8 +1039,8 @@ const CookiesTable = ({
             textAlign: 'center'
           },
           children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
-            colSpan: 5,
-            children: __('No cookies added yet - please add some using the button bellow.', 'am2')
+            colSpan: 6,
+            children: __('No cookies added yet - please add some using the button bellow.', 'wecodeart')
           })
         })
       })]

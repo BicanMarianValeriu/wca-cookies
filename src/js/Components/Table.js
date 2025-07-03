@@ -24,7 +24,7 @@ const {
 const { categories = [] } = wecodeartCookies || {};
 
 const ManageCookie = ({ closeModal, createNotice, currentCookie, setCookies }) => {
-    const [data, setData] = useState(currentCookie ?? { name: '', duration: '', category: '', description: '' });
+    const [data, setData] = useState(currentCookie || { name: '', duration: '', category: '', description: '', blockedPatterns: '' });
     const [doingAjax, setDoingAjax] = useState(null);
     const formRef = useRef(null);
 
@@ -34,7 +34,7 @@ const ManageCookie = ({ closeModal, createNotice, currentCookie, setCookies }) =
         const formData = new FormData(formRef.current);
         if (currentCookie) {
             // Add name for editing cookie (as the input is disabled);
-            formData.set('name', currentCookie?.name);
+            formData.set('name', currentCookie.name);
         }
 
         const response = await fetch(`${wecodeart.restUrl}/manage_cookies`, {
@@ -55,15 +55,22 @@ const ManageCookie = ({ closeModal, createNotice, currentCookie, setCookies }) =
     const objectHasEmptyValues = (obj) => Object.keys(obj).filter(key => obj[key] === '').length;
 
     return (
-        <Modal title={currentCookie ? sprintf(__('Edit "%s" cookie', 'wecodeart'), currentCookie?.name) : __('Add cookie', 'wecodeart')} onRequestClose={closeModal}>
+        <Modal title={currentCookie ? sprintf(__('Edit "%s" cookie', 'wecodeart'), currentCookie.name) : __('Add cookie', 'wecodeart')} onRequestClose={closeModal}>
             <form ref={formRef}>
                 <TextControl
                     label={__('Cookie name', 'wecodeart')}
                     name="name"
-                    value={data?.name}
+                    value={data.name || ''}
                     disabled={currentCookie}
                     required
                     onChange={(name) => setData({ ...data, name })}
+                />
+                <TextareaControl
+                    label={__('Regex', 'wecodeart')}
+                    name="blockedPatterns"
+                    help={__('Comma-separated patterns to block (e.g., _ga_*, _hjSession_*). Use * as wildcard.', 'wecodeart')}
+                    value={data.blockedPatterns || ''}
+                    onChange={(blockedPatterns) => setData({ ...data, blockedPatterns })}
                 />
                 <TextControl
                     label={__('Duration', 'wecodeart')}
@@ -145,6 +152,7 @@ const CookiesTable = ({ formData, setFormData, cookies, setCookies, createNotice
                         <th>{__('Description', 'wecodeart')}</th>
                         <th>{__('Duration', 'wecodeart')}</th>
                         <th>{__('Category', 'wecodeart')}</th>
+                        <th>{__('Regex', 'wecodeart')}</th>
                         <th style={{
                             width: '1px',
                             whiteSpace: 'nowrap'
@@ -153,14 +161,15 @@ const CookiesTable = ({ formData, setFormData, cookies, setCookies, createNotice
                 </thead>
                 <tbody>
                     {Object.keys(cookies).length ? Object.keys(cookies).map(key => {
-                        const { name, description, duration = '-', category } = cookies[key];
+                        const { name, description, duration = '-', category, blockedPatterns } = cookies[key];
 
                         return (
                             <tr key={key}>
-                                <td>{name ?? key}</td>
+                                <td>{name || key}</td>
                                 <td>{description}</td>
                                 <td>{duration}</td>
-                                <td>{categories?.[category] ? categories[category] : '-'}</td>
+                                <td>{categories && categories[category] ? categories[category] : '-'}</td>
+                                <td style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{blockedPatterns || '-'}</td>
                                 <td>
                                     {name ? <ButtonGroup style={{ display: 'flex' }}>
                                         <Button variant="secondary" isSmall onClick={() => {
@@ -194,7 +203,7 @@ const CookiesTable = ({ formData, setFormData, cookies, setCookies, createNotice
                             </tr>
                         );
                     }) : <tr style={{ textAlign: 'center' }}>
-                        <td colSpan={5}>{__('No cookies added yet - please add some using the button bellow.', 'am2')}</td>
+                        <td colSpan={6}>{__('No cookies added yet - please add some using the button bellow.', 'wecodeart')}</td>
                     </tr>}
                 </tbody>
             </table>
