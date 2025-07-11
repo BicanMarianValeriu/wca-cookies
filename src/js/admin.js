@@ -119,6 +119,18 @@ const Options = (props) => {
                         name: 'cookies',
                         title: __('Cookies', 'wecodeart'),
                         render:
+                        <CookiesTable {...{
+                            formData,
+                            setFormData,
+                            cookies,
+                            setCookies,
+                            createNotice
+                        }} />
+                    },
+                    {
+                        name: 'settings',
+                        title: __('Settings', 'wecodeart'),
+                        render:
                             <>
                                 <Card className="border shadow-none">
                                     <CardHeader>
@@ -196,14 +208,6 @@ const Options = (props) => {
                                 >
                                     {loading ? '' : __('Save', 'wecodeart')}
                                 </Button>
-                                <hr style={{ margin: '20px 0' }} />
-                                <CookiesTable {...{
-                                    formData,
-                                    setFormData,
-                                    cookies,
-                                    setCookies,
-                                    createNotice
-                                }} />
                             </>
 
                     },
