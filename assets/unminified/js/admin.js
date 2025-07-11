@@ -778,7 +778,8 @@ __webpack_require__.r(__webpack_exports__);
 
 const {
   i18n: {
-    __
+    __,
+    sprintf
   },
   components: {
     Modal,
@@ -790,12 +791,17 @@ const {
     Spinner,
     Placeholder,
     Dashicon,
-    Tooltip
+    Tooltip,
+    Card,
+    CardHeader,
+    CardBody,
+    __experimentalHStack: HStack
   },
   element: {
     useEffect,
     useState,
-    useRef
+    useRef,
+    useMemo
   }
 } = wp;
 const {
@@ -911,6 +917,80 @@ const ManageCookie = ({
     })
   });
 };
+const Pagination = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+  totalItems,
+  itemsPerPage
+}) => {
+  const startItem = (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1);
+        pages.push('...');
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages);
+      }
+    }
+    return pages;
+  };
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", {
+    className: "d-flex justify-content-between align-items-center mt-3",
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", {
+      className: "text-muted",
+      children: sprintf(__('Showing %1$d-%2$d of %3$d items', 'wecodeart'), startItem, endItem, totalItems)
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", {
+      className: "d-flex gap-1",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Button, {
+        variant: "secondary",
+        isSmall: true,
+        disabled: currentPage === 1,
+        onClick: () => onPageChange(currentPage - 1),
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Dashicon, {
+          icon: "arrow-left-alt2"
+        })
+      }), getPageNumbers().map((page, index) => /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Button, {
+        variant: page === currentPage ? "primary" : "secondary",
+        isSmall: true,
+        disabled: page === '...',
+        onClick: () => page !== '...' && onPageChange(page),
+        children: page
+      }, index)), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Button, {
+        variant: "secondary",
+        isSmall: true,
+        disabled: currentPage === totalPages,
+        onClick: () => onPageChange(currentPage + 1),
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Dashicon, {
+          icon: "arrow-right-alt2"
+        })
+      })]
+    })]
+  });
+};
 const CookiesTable = ({
   formData,
   setFormData,
@@ -921,6 +1001,11 @@ const CookiesTable = ({
   const [currentCookie, setCurrentCookie] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const [doingAjax, setDoingAjax] = useState(false);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [searchTerm, setSearchTerm] = useState('');
   useEffect(() => {
     async function fetchCookies() {
       const response = await fetch(`${wecodeart.restUrl}/manage_cookies`, {
@@ -931,123 +1016,239 @@ const CookiesTable = ({
     }
     fetchCookies();
   }, []);
+
+  // Filter and paginate cookies
+  const filteredCookies = useMemo(() => {
+    if (!cookies || typeof cookies !== 'object') return {};
+    const filtered = Object.keys(cookies).filter(key => {
+      const cookie = cookies[key];
+      const searchLower = searchTerm.toLowerCase();
+      return (cookie.name || key).toLowerCase().includes(searchLower) || (cookie.description || '').toLowerCase().includes(searchLower) || (cookie.category || '').toLowerCase().includes(searchLower) || (categories[cookie.category] || '').toLowerCase().includes(searchLower);
+    });
+
+    // Sort cookies: non-editable (API cookies) first, then editable cookies
+    const sortedKeys = filtered.sort((a, b) => {
+      const cookieA = cookies[a];
+      const cookieB = cookies[b];
+
+      // Non-editable cookies (no name property) come first
+      const isEditableA = !!cookieA.name;
+      const isEditableB = !!cookieB.name;
+      if (isEditableA !== isEditableB) {
+        return isEditableA ? 1 : -1; // Non-editable first
+      }
+
+      // If both are same type, sort alphabetically by name
+      const nameA = cookieA.name || a;
+      const nameB = cookieB.name || b;
+      return nameA.toLowerCase().localeCompare(nameB.toLowerCase());
+    });
+    return sortedKeys.reduce((acc, key) => {
+      acc[key] = cookies[key];
+      return acc;
+    }, {});
+  }, [cookies, searchTerm]);
+  const paginatedCookies = useMemo(() => {
+    const keys = Object.keys(filteredCookies);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return keys.slice(startIndex, endIndex).reduce((acc, key) => {
+      acc[key] = filteredCookies[key];
+      return acc;
+    }, {});
+  }, [filteredCookies, currentPage, itemsPerPage]);
+
+  // Reset to first page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
   if (cookies === false) {
     return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Placeholder, {
       instructions: __('Loading cookies...', 'wecodeart')
     });
   }
+  const totalItems = Object.keys(filteredCookies).length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.Fragment, {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("table", {
-      className: "table table-bordered table-hover",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("thead", {
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("tr", {
-          style: {
-            textAlign: 'left'
-          },
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("th", {
-            children: __('Cookie name', 'wecodeart')
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("th", {
-            children: __('Description', 'wecodeart')
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("th", {
-            children: __('Duration', 'wecodeart')
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("th", {
-            children: __('Category', 'wecodeart')
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("th", {
-            children: __('Regex', 'wecodeart')
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("th", {
-            style: {
-              width: '1px',
-              whiteSpace: 'nowrap'
-            },
-            children: __('Actions', 'wecodeart')
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(Card, {
+      className: "border shadow-none h-100",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(CardHeader, {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(HStack, {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("h5", {
+            className: "text-uppercase fw-medium m-0",
+            children: __('Cookies Management', 'wecodeart')
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Button, {
+            className: "button",
+            isPrimary: true,
+            onClick: () => setIsOpen(true),
+            children: __('Add cookies', 'wecodeart')
           })]
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("tbody", {
-        children: Object.keys(cookies).length ? Object.keys(cookies).map(key => {
-          const {
-            name,
-            description,
-            duration = '-',
-            category,
-            blockedPatterns
-          } = cookies[key];
-          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("tr", {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
-              children: name || key
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
-              children: description
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
-              children: duration
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
-              children: categories && categories[category] ? categories[category] : '-'
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
-              style: {
-                maxWidth: '120px',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
-              },
-              children: blockedPatterns || '-'
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
-              children: name ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(ButtonGroup, {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(CardBody, {
+        style: {
+          color: 'rgb(30, 30, 30)'
+        },
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(HStack, {
+          className: "mb-3",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", {
+            className: "flex-grow-1",
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(TextControl, {
+              placeholder: __('Search cookies...', 'wecodeart'),
+              value: searchTerm,
+              onChange: setSearchTerm
+            })
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", {
+            style: {
+              minWidth: '120px'
+            },
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(SelectControl, {
+              value: itemsPerPage,
+              options: [{
+                label: '5',
+                value: 5
+              }, {
+                label: '10',
+                value: 10
+              }, {
+                label: '25',
+                value: 25
+              }, {
+                label: '50',
+                value: 50
+              }],
+              onChange: value => {
+                setItemsPerPage(parseInt(value));
+                setCurrentPage(1);
+              }
+            })
+          })]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", {
+          className: "table-responsive",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("table", {
+            className: "table table-bordered table-hover",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("thead", {
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("tr", {
                 style: {
-                  display: 'flex'
+                  textAlign: 'left'
                 },
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Button, {
-                  variant: "secondary",
-                  isSmall: true,
-                  onClick: () => {
-                    setIsOpen(true);
-                    setCurrentCookie(cookies[key]);
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("th", {
+                  children: __('Cookie name', 'wecodeart')
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("th", {
+                  children: __('Description', 'wecodeart')
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("th", {
+                  children: __('Duration', 'wecodeart')
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("th", {
+                  children: __('Category', 'wecodeart')
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("th", {
+                  children: __('Regex', 'wecodeart')
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("th", {
+                  style: {
+                    width: '1px',
+                    whiteSpace: 'nowrap'
                   },
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Dashicon, {
-                    icon: "edit"
-                  })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Button, {
-                  variant: "secondary",
-                  isDestructive: true,
-                  isSmall: true,
-                  disabled: doingAjax,
-                  onClick: async () => {
-                    setDoingAjax(true);
-                    const formData = new FormData();
-                    formData.set('name', name);
-                    formData.set('remove', true);
-                    const response = await fetch(`${wecodeart.restUrl}/manage_cookies`, {
-                      method: 'POST',
-                      body: formData
-                    });
-                    const data = await response.json();
-                    setCookies(data);
-                    setDoingAjax(false);
-                    createNotice('success', sprintf(__('Cookie "%s" has been removed.', 'wecodeart'), name));
-                  },
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Dashicon, {
-                    icon: "trash"
-                  })
+                  children: __('Actions', 'wecodeart')
                 })]
-              }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Tooltip, {
-                text: __('This cookie is added via API - it cannot be modified.', 'wecodeart'),
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Dashicon, {
-                  icon: "lock"
+              })
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("tbody", {
+              children: Object.keys(paginatedCookies).length ? Object.keys(paginatedCookies).map(key => {
+                const {
+                  name,
+                  description,
+                  duration = '-',
+                  category,
+                  blockedPatterns
+                } = paginatedCookies[key];
+                const isSystemCookie = !name; // System cookies don't have a name property
+
+                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("tr", {
+                  style: {
+                    backgroundColor: isSystemCookie ? 'rgba(0, 0, 0, 0.02)' : 'transparent',
+                    borderLeft: isSystemCookie ? '3px solid #007cba' : 'none'
+                  },
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
+                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("div", {
+                      className: "d-flex align-items-center gap-2",
+                      children: name || key
+                    })
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
+                    children: description
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
+                    children: duration
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
+                    children: categories && categories[category] ? categories[category] : '-'
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
+                    style: {
+                      maxWidth: '120px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    },
+                    children: blockedPatterns || '-'
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
+                    children: name ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(ButtonGroup, {
+                      style: {
+                        display: 'flex'
+                      },
+                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Button, {
+                        variant: "secondary",
+                        isSmall: true,
+                        onClick: () => {
+                          setIsOpen(true);
+                          setCurrentCookie(paginatedCookies[key]);
+                        },
+                        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Dashicon, {
+                          icon: "edit"
+                        })
+                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Button, {
+                        variant: "secondary",
+                        isDestructive: true,
+                        isSmall: true,
+                        disabled: doingAjax,
+                        onClick: async () => {
+                          setDoingAjax(true);
+                          const formData = new FormData();
+                          formData.set('name', name);
+                          formData.set('remove', true);
+                          const response = await fetch(`${wecodeart.restUrl}/manage_cookies`, {
+                            method: 'POST',
+                            body: formData
+                          });
+                          const data = await response.json();
+                          setCookies(data);
+                          setDoingAjax(false);
+                          createNotice('success', sprintf(__('Cookie "%s" has been removed.', 'wecodeart'), name));
+                        },
+                        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Dashicon, {
+                          icon: "trash"
+                        })
+                      })]
+                    }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Tooltip, {
+                      text: __('This cookie is added via API - it cannot be modified.', 'wecodeart'),
+                      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Dashicon, {
+                        icon: "lock"
+                      })
+                    })
+                  })]
+                }, key);
+              }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("tr", {
+                style: {
+                  textAlign: 'center'
+                },
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
+                  colSpan: 6,
+                  children: searchTerm ? sprintf(__('No cookies found matching "%s".', 'wecodeart'), searchTerm) : __('No cookies added yet - please add some using the button above.', 'wecodeart')
                 })
               })
             })]
-          }, key);
-        }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("tr", {
-          style: {
-            textAlign: 'center'
-          },
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("td", {
-            colSpan: 6,
-            children: __('No cookies added yet - please add some using the button bellow.', 'wecodeart')
           })
-        })
+        }), totalItems > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Pagination, {
+          currentPage: currentPage,
+          totalPages: totalPages,
+          onPageChange: setCurrentPage,
+          totalItems: totalItems,
+          itemsPerPage: itemsPerPage
+        })]
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Button, {
-      className: "button",
-      onClick: () => setIsOpen(true),
-      children: __('Add cookies', 'wecodeart')
     }), isOpen && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(ManageCookie, {
       formData,
       setFormData,
@@ -1410,6 +1611,16 @@ const Options = props => {
       tabs: [{
         name: 'cookies',
         title: __('Cookies', 'wecodeart'),
+        render: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_Components__WEBPACK_IMPORTED_MODULE_0__.CookiesTable, {
+          formData,
+          setFormData,
+          cookies,
+          setCookies,
+          createNotice
+        })
+      }, {
+        name: 'settings',
+        title: __('Settings', 'wecodeart'),
         render: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.Fragment, {
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)(Card, {
             className: "border shadow-none",
@@ -1493,16 +1704,6 @@ const Options = props => {
             },
             disabled: loading,
             children: loading ? '' : __('Save', 'wecodeart')
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("hr", {
-            style: {
-              margin: '20px 0'
-            }
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)(_Components__WEBPACK_IMPORTED_MODULE_0__.CookiesTable, {
-            formData,
-            setFormData,
-            cookies,
-            setCookies,
-            createNotice
           })]
         })
       }, {
