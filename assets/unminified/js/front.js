@@ -232,7 +232,7 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       // Handle switches based on user preference.
-      let blockedCookies = Cookies.get('wp-cookies-blocked') || [];
+      let blockedCookies = Cookies.get('wp-cookies-blocked') || '';
       if (blockedCookies) {
         blockedCookies = blockedCookies.split(',').map(c => c.trim());
         Cookies.removeMultiple(blockedCookies);
