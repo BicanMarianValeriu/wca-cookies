@@ -58,7 +58,7 @@ const ManageCookie = ({ closeModal, createNotice, currentCookie, setCookies }) =
         closeModal();
     };
 
-    const objectHasEmptyValues = (obj) => Object.keys(obj).filter(key => obj[key] === '').length;
+    const objectHasEmptyValues = (obj) => Object.keys(obj).filter(key => key !== 'blockedPatterns' && obj[key] === '').length;
 
     return (
         <Modal title={currentCookie ? sprintf(__('Edit "%s" cookie', 'wecodeart'), currentCookie.name) : __('Add cookie', 'wecodeart')} onRequestClose={closeModal}>

@@ -269,6 +269,19 @@ __webpack_require__.r(__webpack_exports__);
         Selector.findOne('#wp-cookies-toggle').click();
         console.log('WP Cookies: Undefined preferences.');
       }, 500);
+
+      // Observe DOM changes to remove cookies that match blocked patterns
+      // This is useful for dynamic content that may add cookies after the initial load.
+      const observer = new MutationObserver(() => {
+        Cookies.removeByPattern();
+      });
+      observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true
+      });
+      setTimeout(() => {
+        observer.disconnect(); // Stop observing after 15s
+      }, 15000);
     }
   });
 
