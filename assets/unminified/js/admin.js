@@ -839,7 +839,7 @@ const ManageCookie = ({
     createNotice('success', sprintf(__('Cookie %s.', 'wecodeart'), currentCookie ? __('updated', 'wecodeart') : __('added', 'wecodeart')));
     closeModal();
   };
-  const objectHasEmptyValues = obj => Object.keys(obj).filter(key => obj[key] === '').length;
+  const objectHasEmptyValues = obj => Object.keys(obj).filter(key => key !== 'blockedPatterns' && obj[key] === '').length;
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(Modal, {
     title: currentCookie ? sprintf(__('Edit "%s" cookie', 'wecodeart'), currentCookie.name) : __('Add cookie', 'wecodeart'),
     onRequestClose: closeModal,
